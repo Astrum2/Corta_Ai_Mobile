@@ -7,7 +7,7 @@ const DARK = {
     tertiaryBg: "#12162A",
     borderColor: "#243747",
 
-    primary: "#9A1F1B",
+    primary: "#082af0",
     primaryText: "#FFFFFF",
 
     danger: "#C43A32",

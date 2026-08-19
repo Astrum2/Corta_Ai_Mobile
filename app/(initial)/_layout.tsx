@@ -8,7 +8,7 @@ export default function Layout() {
             <Tabs.Screen 
                 name="home"
                 options={{
-                    title: "Initial",
+                    title: "Home",
                     tabBarIcon: ({ color }) => <FontAwesome size={18} name="home" color={color} />
                 }}
             />
@@ -20,16 +20,9 @@ export default function Layout() {
                 }}
             />
             <Tabs.Screen 
-                name="pastel"
+                name="sobre"
                 options={{
-                    title: "Pastel no header",
-                    tabBarIcon: ({ color }) => <FontAwesome size={18} name="hand-grab-o" color={color} />
-                }}
-            />
-             <Tabs.Screen 
-                name="agendamento"
-                options={{
-                    title: "agendamento",
+                    title: "Sobre",
                     tabBarIcon: ({ color }) => <FontAwesome size={18} name="home" color={color} />
                 }}
             />
