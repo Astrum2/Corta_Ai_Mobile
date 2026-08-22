@@ -2,6 +2,7 @@ import { useTheme } from "@/contexts/theme";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login() {
     const { theme, font, fontSize, radius, space } = useTheme();
@@ -30,6 +31,7 @@ export default function Login() {
     }
 
     return (
+        <SafeAreaView>
         <View
             style={[
                 styles.page,
@@ -193,6 +195,7 @@ export default function Login() {
                 </View>
             </View>
         </View>
+        </SafeAreaView>
     );
 }
 
