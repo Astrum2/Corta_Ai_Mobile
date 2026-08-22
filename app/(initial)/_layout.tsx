@@ -26,6 +26,13 @@ export default function Layout() {
                     tabBarIcon: ({ color }) => <FontAwesome size={18} name="home" color={color} />
                 }}
             />
+            <Tabs.Screen 
+                name="services"
+                options={{
+                    title: "Serviços",
+                    tabBarIcon: ({ color }) => <FontAwesome size={18} name="home" color={color} />
+                }}
+            />
         </Tabs>
         
     )
