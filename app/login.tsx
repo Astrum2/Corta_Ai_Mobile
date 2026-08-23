@@ -23,7 +23,7 @@ export default function Login() {
         }
 
         if (email === "admin" && senha === "murilo123") {
-            router.replace("/home")
+            router.replace("/(initial)/home")
         }else {
             Alert.alert("Email ou senha inválidos")
         }
@@ -31,7 +31,7 @@ export default function Login() {
     }
 
     return (
-        <SafeAreaView>
+        <SafeAreaView style={styles.safeArea}>
         <View
             style={[
                 styles.page,
@@ -200,6 +200,9 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+    },
     page: {
         flex: 1,
         justifyContent: "flex-start",
