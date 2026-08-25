@@ -27,7 +27,7 @@ const LIGHT = {
     borderColor: "#E6E2DC",
 
     primary: "#9A1F1B",
-    primaryText: "#FFFFFF",
+    primaryText: "#020202",
 
     danger: "#C43A32",
     success: "#3E8E68",

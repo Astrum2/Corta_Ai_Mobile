@@ -4,8 +4,11 @@ import React, { useState } from "react";
 import { Alert, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const onlyDigits = (value: string) => value.replace(/\D/g, "");
+
 export default function Login() {
-    const { theme, font, fontSize, radius, space } = useTheme();
+    const { currentColor, theme, font, fontSize, radius, space } = useTheme();
+    const inputTextColor = currentColor === "dark" ? "#FFFFFF" : theme.bodyColor;
 
     const [email, setEmail] = useState("")
     const [senha, setSenha] = useState("")
@@ -85,7 +88,7 @@ export default function Login() {
                         style={[
                             styles.input,
                             {
-                                color: theme.bodyColor,
+                                color: inputTextColor,
                                 backgroundColor: theme.tertiaryBg,
                                 borderColor: theme.borderColor,
                                 borderRadius: radius.base,
@@ -98,7 +101,7 @@ export default function Login() {
                         keyboardType="email-address"
                         autoCapitalize="none"
                         placeholder="Email"
-                        placeholderTextColor={theme.tertiaryColor}
+                        placeholderTextColor={inputTextColor}
                     />
                 </View>
 
@@ -121,7 +124,7 @@ export default function Login() {
                         style={[
                             styles.input,
                             {
-                                color: theme.bodyColor,
+                                color: inputTextColor,
                                 backgroundColor: theme.tertiaryBg,
                                 borderColor: theme.borderColor,
                                 borderRadius: radius.base,
@@ -132,7 +135,7 @@ export default function Login() {
                         value={senha}
                         onChangeText={setSenha}
                         placeholder="Senha"
-                        placeholderTextColor={theme.tertiaryColor}
+                        placeholderTextColor={inputTextColor}
                         secureTextEntry
                     />
                 </View>
@@ -180,18 +183,20 @@ export default function Login() {
                         Não possui conta?{" "}
                     </Text>
 
-                    <Text
-                        style={[
-                            styles.registerLink,
-                            {
-                                color: theme.primary,
-                                fontFamily: font.baseMedium,
-                                fontSize: fontSize.base,
-                            },
-                        ]}
-                    >
-                        Cadastre-se aqui
-                    </Text>
+                    <Pressable onPress={() => router.push("/cadastro")}>
+                        <Text
+                            style={[
+                                styles.registerLink,
+                                {
+                                    color: "#FFFFFF",
+                                    fontFamily: font.baseMedium,
+                                    fontSize: fontSize.base,
+                                },
+                            ]}
+                        >
+                            Cadastre-se aqui
+                        </Text>
+                    </Pressable>
                 </View>
             </View>
         </View>
@@ -215,7 +220,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         ...Platform.select({
             ios: {
-                shadowColor: "#000",
+                shadowColor: "#0a0a0a",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.1,
                 shadowRadius: 8,
