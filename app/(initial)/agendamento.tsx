@@ -6,7 +6,8 @@ import React, { useState } from "react";
 import { Alert, StyleSheet, TextInput, View } from "react-native";
 
 export default function Login() {
-    const { theme, radius, fontSize } = useTheme()
+    const { currentColor, theme, radius, fontSize } = useTheme()
+    const inputTextColor = currentColor === "dark" ? "#FFFFFF" : theme.bodyColor
     const [email, setEmail] = useState('')
     const [senha, setSenha] = useState('')
     const router = useRouter()
@@ -51,13 +52,15 @@ export default function Login() {
                         borderColor: theme.borderColor,
                         backgroundColor: theme.tertiaryBg,
                         borderRadius: radius.base,
-                        fontSize: fontSize.base
+                        fontSize: fontSize.base,
+                        color: inputTextColor
                     }
                 ]}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 placeholder="Email"
+                placeholderTextColor={inputTextColor}
             />
 
             <TextInput
@@ -67,12 +70,14 @@ export default function Login() {
                         borderColor: theme.borderColor,
                         backgroundColor: theme.tertiaryBg,
                         borderRadius: radius.base,
-                        fontSize: fontSize.base
+                        fontSize: fontSize.base,
+                        color: inputTextColor
                     }
                 ]}
                 value={senha}
                 onChangeText={setSenha}
                 placeholder="Senha"
+                placeholderTextColor={inputTextColor}
                 secureTextEntry
             />
 
