@@ -6,44 +6,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
 
-const formatCPF = (value: string) => {
-    const digits = onlyDigits(value).slice(0, 11);
-    return digits
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-};
-
-const formatPhone = (value: string) => {
-    const digits = onlyDigits(value).slice(0, 11);
-    if (digits.length <= 2) return digits;
-    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-};
-
-const isValidCPF = (value: string) => {
-    const cpf = onlyDigits(value);
-    if (cpf.length !== 11 || /^([0-9])\1+$/.test(cpf)) return false;
-
-    const calculateDigit = (length: number) => {
-        let sum = 0;
-        for (let index = 0; index < length; index += 1) {
-            sum += Number(cpf[index]) * (length + 1 - index);
-        }
-        const remainder = (sum * 10) % 11;
-        return remainder === 10 ? 0 : remainder;
-    };
-
-    return calculateDigit(9) === Number(cpf[9]) && calculateDigit(10) === Number(cpf[10]);
-};
-
 export default function Login() {
     const { currentColor, theme, font, fontSize, radius, space } = useTheme();
     const inputTextColor = currentColor === "dark" ? "#FFFFFF" : theme.bodyColor;
 
     const [email, setEmail] = useState("")
-    const [cpf, setCpf] = useState("")
-    const [numero, setNumero] = useState("")
     const [senha, setSenha] = useState("")
     const router = useRouter()
 
@@ -55,16 +22,6 @@ export default function Login() {
 
         if (!senha.trim()) {
             Alert.alert("Erro", "Senha é obrigatória")
-            return
-        }
-
-        if (cpf.trim() && !isValidCPF(cpf)) {
-            Alert.alert("Erro", "Digite um CPF válido")
-            return
-        }
-
-        if (numero.trim() && onlyDigits(numero).length < 10) {
-            Alert.alert("Erro", "Digite um número válido")
             return
         }
 
@@ -144,30 +101,6 @@ export default function Login() {
                         keyboardType="email-address"
                         autoCapitalize="none"
                         placeholder="Email"
-                        placeholderTextColor={inputTextColor}
-                    />
-                </View>
-
-                <View style={[styles.formGroup, { marginBottom: space[5] }]}>
-                    <Text style={[styles.label, { color: theme.bodyColor, fontFamily: font.baseMedium, fontSize: fontSize.base, marginBottom: space[2] }]}>CPF:</Text>
-                    <TextInput
-                        style={[styles.input, { color: inputTextColor, backgroundColor: theme.tertiaryBg, borderColor: theme.borderColor, borderRadius: radius.base, fontFamily: font.base, fontSize: fontSize.lg }]}
-                        value={cpf}
-                        onChangeText={(value) => setCpf(formatCPF(value))}
-                        keyboardType="numeric"
-                        placeholder="000.000.000-00"
-                        placeholderTextColor={inputTextColor}
-                    />
-                </View>
-
-                <View style={[styles.formGroup, { marginBottom: space[5] }]}>
-                    <Text style={[styles.label, { color: theme.bodyColor, fontFamily: font.baseMedium, fontSize: fontSize.base, marginBottom: space[2] }]}>Número:</Text>
-                    <TextInput
-                        style={[styles.input, { color: inputTextColor, backgroundColor: theme.tertiaryBg, borderColor: theme.borderColor, borderRadius: radius.base, fontFamily: font.base, fontSize: fontSize.lg }]}
-                        value={numero}
-                        onChangeText={(value) => setNumero(formatPhone(value))}
-                        keyboardType="phone-pad"
-                        placeholder="(00) 00000-0000"
                         placeholderTextColor={inputTextColor}
                     />
                 </View>

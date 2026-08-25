@@ -7,7 +7,7 @@ import { Alert, StyleSheet, TextInput, View } from "react-native";
 
 export default function Login() {
     const { currentColor, theme, radius, fontSize } = useTheme()
-const inputTextColor = currentColor === "dark" ? "#FFFFFF" : theme.bodyColor
+    const inputTextColor = currentColor === "dark" ? "#FFFFFF" : theme.bodyColor
     const [email, setEmail] = useState('')
     const [senha, setSenha] = useState('')
     const router = useRouter()
@@ -60,7 +60,7 @@ const inputTextColor = currentColor === "dark" ? "#FFFFFF" : theme.bodyColor
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 placeholder="Email"
-placeholderTextColor={inputTextColor}
+                placeholderTextColor={inputTextColor}
             />
 
             <TextInput
@@ -77,7 +77,7 @@ placeholderTextColor={inputTextColor}
                 value={senha}
                 onChangeText={setSenha}
                 placeholder="Senha"
-placeholderTextColor={inputTextColor}
+                placeholderTextColor={inputTextColor}
                 secureTextEntry
             />
 
