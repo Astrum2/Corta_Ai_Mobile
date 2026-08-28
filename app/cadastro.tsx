@@ -1,7 +1,8 @@
 import { useTheme } from "@/contexts/theme";
+import { registerUser } from "@/services/api";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
 
@@ -13,13 +14,6 @@ const formatCPF = (value: string) => {
         .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 };
 
-const formatPhone = (value: string) => {
-    const digits = onlyDigits(value).slice(0, 11);
-    if (digits.length <= 2) return digits;
-    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-};
-
 const isValidCPF = (value: string) => {
     const cpf = onlyDigits(value);
     if (cpf.length !== 11 || /^([0-9])\1+$/.test(cpf)) return false;
@@ -29,6 +23,7 @@ const isValidCPF = (value: string) => {
         for (let index = 0; index < length; index += 1) {
             sum += Number(cpf[index]) * (length + 1 - index);
         }
+
         const remainder = (sum * 10) % 11;
         return remainder === 10 ? 0 : remainder;
     };
@@ -42,14 +37,23 @@ const isValidPassword = (value: string) => /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]
 export default function Cadastro() {
     const { currentColor, theme, font, fontSize, radius, space } = useTheme();
     const inputTextColor = currentColor === "dark" ? "#FFFFFF" : theme.bodyColor;
+
+    const [nome, setNome] = useState("");
     const [email, setEmail] = useState("");
     const [cpf, setCpf] = useState("");
     const [numero, setNumero] = useState("");
     const [senha, setSenha] = useState("");
     const [confirmarSenha, setConfirmarSenha] = useState("");
+    const [loading, setLoading] = useState(false);
+
     const router = useRouter();
 
-    const cadastro = () => {
+    const cadastro = async () => {
+        if (!nome.trim()) {
+            Alert.alert("Erro", "Campo nome é obrigatório");
+            return;
+        }
+
         if (!email.trim()) {
             Alert.alert("Erro", "Campo email é obrigatório");
             return;
@@ -65,18 +69,16 @@ export default function Cadastro() {
             return;
         }
 
-        if (!numero.trim() || onlyDigits(numero).length < 10) {
-            Alert.alert("Erro", "Digite um número válido");
-            return;
-        }
-
         if (!senha.trim()) {
             Alert.alert("Erro", "Senha é obrigatória");
             return;
         }
 
         if (!isValidPassword(senha)) {
-            Alert.alert("Erro", "A senha deve ter no mínimo 7 caracteres, uma letra maiúscula, um símbolo e um número");
+            Alert.alert(
+                "Erro",
+                "A senha deve ter no mínimo 7 caracteres, uma letra maiúscula, um símbolo e um número"
+            );
             return;
         }
 
@@ -85,127 +87,294 @@ export default function Cadastro() {
             return;
         }
 
-        Alert.alert("Sucesso", "Cadastro realizado com sucesso", [
-            { text: "OK", onPress: () => router.replace("/login") },
-        ]);
+        try {
+            setLoading(true);
+
+            await registerUser({
+                name: nome,
+                email,
+                cpf,
+                password: senha,
+            });
+
+            setNome("");
+            setEmail("");
+            setCpf("");
+            setNumero("");
+            setSenha("");
+            setConfirmarSenha("");
+
+            router.replace("/login");
+        } catch (error) {
+            const message = error instanceof Error
+                ? error.message
+                : "Não foi possível realizar o cadastro.";
+
+            Alert.alert("Erro", message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <View
-            style={[
-                styles.page,
-                {
-                    backgroundColor: theme.bodyBg,
-                    paddingHorizontal: space[4],
-                },
-            ]}
+
+        <ScrollView
+            keyboardShouldPersistTaps="handled"
         >
             <View
                 style={[
-                    styles.card,
+                    styles.page,
                     {
-                        backgroundColor: theme.secondaryBg,
-                        borderColor: theme.bodyColor,
-                        borderRadius: radius.lg,
-                        padding: space[7],
+                        backgroundColor: theme.bodyBg,
+                        paddingHorizontal: space[4],
                     },
                 ]}
             >
-                <Text
+                <View
                     style={[
-                        styles.title,
+                        styles.card,
                         {
-                            color: theme.bodyColor,
-                            fontFamily: font.baseBold,
-                            fontSize: fontSize.h2,
-                            marginBottom: space[6],
+                            backgroundColor: theme.secondaryBg,
+                            borderColor: theme.bodyColor,
+                            borderRadius: radius.lg,
+                            padding: space[7],
                         },
                     ]}
                 >
-                    Cadastro
-                </Text>
-
-                <View style={[styles.formGroup, { marginBottom: space[5] }]}>
-                    <Text style={[styles.label, { color: theme.bodyColor, fontFamily: font.baseMedium, fontSize: fontSize.base, marginBottom: space[2] }]}>
-                        Email:
+                    <Text
+                        style={[
+                            styles.title,
+                            {
+                                color: theme.bodyColor,
+                                fontFamily: font.baseBold,
+                                fontSize: fontSize.h2,
+                                marginBottom: space[6],
+                            },
+                        ]}
+                    >
+                        Cadastro
                     </Text>
-                    <TextInput
-                        style={[styles.input, { color: inputTextColor, backgroundColor: theme.tertiaryBg, borderColor: theme.borderColor, borderRadius: radius.base, fontFamily: font.base, fontSize: fontSize.lg }]}
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        placeholder="Email"
-                        placeholderTextColor={inputTextColor}
-                    />
+
+                    <View style={[styles.formGroup, { marginBottom: space[5] }]}>
+                        <Text
+                            style={[
+                                styles.label,
+                                {
+                                    color: theme.bodyColor,
+                                    fontFamily: font.baseMedium,
+                                    fontSize: fontSize.base,
+                                    marginBottom: space[2],
+                                },
+                            ]}
+                        >
+                            Nome:
+                        </Text>
+
+                        <TextInput
+                            style={[
+                                styles.input,
+                                {
+                                    color: inputTextColor,
+                                    backgroundColor: theme.tertiaryBg,
+                                    borderColor: theme.borderColor,
+                                    borderRadius: radius.base,
+                                    fontFamily: font.base,
+                                    fontSize: fontSize.lg,
+                                },
+                            ]}
+                            value={nome}
+                            onChangeText={setNome}
+                            placeholder="Nome"
+                            placeholderTextColor={inputTextColor}
+                        />
+                    </View>
+
+                    <View style={[styles.formGroup, { marginBottom: space[5] }]}>
+                        <Text
+                            style={[
+                                styles.label,
+                                {
+                                    color: theme.bodyColor,
+                                    fontFamily: font.baseMedium,
+                                    fontSize: fontSize.base,
+                                    marginBottom: space[2],
+                                },
+                            ]}
+                        >
+                            Email:
+                        </Text>
+
+                        <TextInput
+                            style={[
+                                styles.input,
+                                {
+                                    color: inputTextColor,
+                                    backgroundColor: theme.tertiaryBg,
+                                    borderColor: theme.borderColor,
+                                    borderRadius: radius.base,
+                                    fontFamily: font.base,
+                                    fontSize: fontSize.lg,
+                                },
+                            ]}
+                            value={email}
+                            onChangeText={setEmail}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            placeholder="Email"
+                            placeholderTextColor={inputTextColor}
+                        />
+                    </View>
+
+                    <View style={[styles.formGroup, { marginBottom: space[5] }]}>
+                        <Text
+                            style={[
+                                styles.label,
+                                {
+                                    color: theme.bodyColor,
+                                    fontFamily: font.baseMedium,
+                                    fontSize: fontSize.base,
+                                    marginBottom: space[2],
+                                },
+                            ]}
+                        >
+                            CPF:
+                        </Text>
+
+                        <TextInput
+                            style={[
+                                styles.input,
+                                {
+                                    color: inputTextColor,
+                                    backgroundColor: theme.tertiaryBg,
+                                    borderColor: theme.borderColor,
+                                    borderRadius: radius.base,
+                                    fontFamily: font.base,
+                                    fontSize: fontSize.lg,
+                                },
+                            ]}
+                            value={cpf}
+                            onChangeText={(value) => setCpf(formatCPF(value))}
+                            keyboardType="numeric"
+                            placeholder="000.000.000-00"
+                            placeholderTextColor={inputTextColor}
+                        />
+                    </View>
+
+                    <View style={[styles.formGroup, { marginBottom: space[5] }]}>
+                        <Text
+                            style={[
+                                styles.label,
+                                {
+                                    color: theme.bodyColor,
+                                    fontFamily: font.baseMedium,
+                                    fontSize: fontSize.base,
+                                    marginBottom: space[2],
+                                },
+                            ]}
+                        >
+                            Senha:
+                        </Text>
+
+                        <TextInput
+                            style={[
+                                styles.input,
+                                {
+                                    color: inputTextColor,
+                                    backgroundColor: theme.tertiaryBg,
+                                    borderColor: theme.borderColor,
+                                    borderRadius: radius.base,
+                                    fontFamily: font.base,
+                                    fontSize: fontSize.lg,
+                                },
+                            ]}
+                            value={senha}
+                            onChangeText={setSenha}
+                            placeholder="Senha"
+                            placeholderTextColor={inputTextColor}
+                            secureTextEntry
+                        />
+                    </View>
+
+                    <View style={[styles.formGroup, { marginBottom: space[5] }]}>
+                        <Text
+                            style={[
+                                styles.label,
+                                {
+                                    color: theme.bodyColor,
+                                    fontFamily: font.baseMedium,
+                                    fontSize: fontSize.base,
+                                    marginBottom: space[2],
+                                },
+                            ]}
+                        >
+                            Confirmar senha:
+                        </Text>
+
+                        <TextInput
+                            style={[
+                                styles.input,
+                                {
+                                    color: inputTextColor,
+                                    backgroundColor: theme.tertiaryBg,
+                                    borderColor: theme.borderColor,
+                                    borderRadius: radius.base,
+                                    fontFamily: font.base,
+                                    fontSize: fontSize.lg,
+                                },
+                            ]}
+                            value={confirmarSenha}
+                            onChangeText={setConfirmarSenha}
+                            placeholder="Confirmar senha"
+                            placeholderTextColor={inputTextColor}
+                            secureTextEntry
+                        />
+                    </View>
+
+                    <Pressable
+                        onPress={cadastro}
+                        disabled={loading}
+                        style={({ pressed }) => [
+                            styles.button,
+                            {
+                                backgroundColor: pressed ? theme.secondaryColor : theme.bodyColor,
+                                borderRadius: radius.base,
+                            },
+                        ]}
+                    >
+                        <Text
+                            style={[
+                                styles.buttonText,
+                                {
+                                    color: theme.secondaryBg,
+                                    fontFamily: font.baseSemibold,
+                                    fontSize: fontSize.lg,
+                                },
+                            ]}
+                        >
+                            {loading ? "Cadastrando..." : "Cadastrar"}
+                        </Text>
+                    </Pressable>
+
+                    <Pressable
+                        onPress={() => router.replace("/login")}
+                        style={{ marginTop: space[4] }}
+                    >
+                        <Text
+                            style={[
+                                styles.backLink,
+                                {
+                                    color: "#FFFFFF",
+                                    fontFamily: font.baseMedium,
+                                    fontSize: fontSize.base,
+                                },
+                            ]}
+                        >
+                            Já possui conta? Entrar
+                        </Text>
+                    </Pressable>
                 </View>
-
-                <View style={[styles.formGroup, { marginBottom: space[5] }]}>
-                    <Text style={[styles.label, { color: theme.bodyColor, fontFamily: font.baseMedium, fontSize: fontSize.base, marginBottom: space[2] }]}>CPF:</Text>
-                    <TextInput
-                        style={[styles.input, { color: inputTextColor, backgroundColor: theme.tertiaryBg, borderColor: theme.borderColor, borderRadius: radius.base, fontFamily: font.base, fontSize: fontSize.lg }]}
-                        value={cpf}
-                        onChangeText={(value) => setCpf(formatCPF(value))}
-                        keyboardType="numeric"
-                        placeholder="000.000.000-00"
-                        placeholderTextColor={inputTextColor}
-                    />
-                </View>
-
-                <View style={[styles.formGroup, { marginBottom: space[5] }]}>
-                    <Text style={[styles.label, { color: theme.bodyColor, fontFamily: font.baseMedium, fontSize: fontSize.base, marginBottom: space[2] }]}>Número:</Text>
-                    <TextInput
-                        style={[styles.input, { color: inputTextColor, backgroundColor: theme.tertiaryBg, borderColor: theme.borderColor, borderRadius: radius.base, fontFamily: font.base, fontSize: fontSize.lg }]}
-                        value={numero}
-                        onChangeText={(value) => setNumero(formatPhone(value))}
-                        keyboardType="phone-pad"
-                        placeholder="(00) 00000-0000"
-                        placeholderTextColor={inputTextColor}
-                    />
-                </View>
-
-                <View style={[styles.formGroup, { marginBottom: space[5] }]}>
-                    <Text style={[styles.label, { color: theme.bodyColor, fontFamily: font.baseMedium, fontSize: fontSize.base, marginBottom: space[2] }]}>
-                        Senha:
-                    </Text>
-                    <TextInput
-                        style={[styles.input, { color: inputTextColor, backgroundColor: theme.tertiaryBg, borderColor: theme.borderColor, borderRadius: radius.base, fontFamily: font.base, fontSize: fontSize.lg }]}
-                        value={senha}
-                        onChangeText={setSenha}
-                        placeholder="Senha"
-                        placeholderTextColor={inputTextColor}
-                        secureTextEntry
-                    />
-                </View>
-
-                <View style={[styles.formGroup, { marginBottom: space[5] }]}>
-                    <Text style={[styles.label, { color: theme.bodyColor, fontFamily: font.baseMedium, fontSize: fontSize.base, marginBottom: space[2] }]}>Confirmar senha:</Text>
-                    <TextInput
-                        style={[styles.input, { color: inputTextColor, backgroundColor: theme.tertiaryBg, borderColor: theme.borderColor, borderRadius: radius.base, fontFamily: font.base, fontSize: fontSize.lg }]}
-                        value={confirmarSenha}
-                        onChangeText={setConfirmarSenha}
-                        placeholder="Confirmar senha"
-                        placeholderTextColor={inputTextColor}
-                            
-                    />
-                </View>
-
-                <Pressable
-                    onPress={cadastro}
-                    style={({ pressed }) => [styles.button, { backgroundColor: pressed ? theme.secondaryColor : theme.bodyColor, borderRadius: radius.base }]}
-                >
-                    <Text style={[styles.buttonText, { color: theme.secondaryBg, fontFamily: font.baseSemibold, fontSize: fontSize.lg }]}>
-                        Cadastrar
-                    </Text>
-                </Pressable>
-
-                <Pressable onPress={() => router.replace("/login")} style={{ marginTop: space[4] }}>
-                    <Text style={[styles.backLink, { color: "#FFFFFF", fontFamily: font.baseMedium, fontSize: fontSize.base }]}> 
-                        Já possui conta? Entrar
-                    </Text>
-                </Pressable>
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
