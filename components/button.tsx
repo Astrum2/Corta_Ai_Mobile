@@ -1,33 +1,40 @@
 import { useTheme } from "@/contexts/theme";
+import React from "react";
 import { Text, TouchableOpacity } from "react-native";
 
 type Props = {
-    onPress: () => void;
-    children: string;
-}
+  onPress: () => void;
+  children: string;
+};
 
-export const Button = (props: Props) => {
-    const { theme, font, fontSize, space, radius } = useTheme()
-    return (
-        <TouchableOpacity
-            onPress={props.onPress}
-            style={{
-                backgroundColor: theme.primary,
-                width: 200,
-                height: 100,
-                borderRadius: radius.lg,
-                justifyContent: "center",
-                alignItems: "center",
-                marginBottom: space[5]
-            }}
-        >
-            <Text
-                style={{
-                    color: theme.primaryText,
-                    fontFamily: font.baseBold,
-                    fontSize: fontSize.h4,
-                }}
-            >{props.children}</Text>
-        </TouchableOpacity>
-    )
-}
+export const Button = ({ onPress, children }: Props) => {
+  const { theme, font, fontSize, radius } = useTheme();
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      style={{
+        backgroundColor: theme.primary,
+        width: 170,
+        minHeight: 42,
+        borderRadius: radius.lg,
+        justifyContent: "center",
+        alignItems: "center",
+        alignSelf: "center",
+        paddingHorizontal: 18,
+        paddingVertical: 10,
+      }}
+    >
+      <Text
+        style={{
+          color: theme.primaryText,
+          fontFamily: font.baseBold,
+          fontSize: fontSize.base,
+          textAlign: "center",
+        }}
+      >
+        {children}
+      </Text>
+    </TouchableOpacity>
+  );
+};

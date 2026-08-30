@@ -21,7 +21,7 @@ const DARK = {
 };
 
 const LIGHT = {
-    bodyBg: "#F7F6F3",
+    bodyBg: "#FFFFFF",
     secondaryBg: "#FFFFFF",
     tertiaryBg: "#FAFAFA",
     borderColor: "#E6E2DC",
