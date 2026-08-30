@@ -68,7 +68,7 @@ export default function Profile() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.screen, { backgroundColor: "#FFFFFF" }]}
+      style={[styles.screen, { backgroundColor: theme.bodyBg }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
@@ -428,14 +428,12 @@ export default function Profile() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
   },
   page: {
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 24,
-    backgroundColor: "#FFFFFF",
   },
   container: {
     width: "100%",
