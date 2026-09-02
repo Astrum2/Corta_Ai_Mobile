@@ -1,4 +1,5 @@
 import { useTheme } from "@/contexts/theme";
+import { loginUser } from "@/services/auth";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
@@ -12,9 +13,10 @@ export default function Login() {
 
     const [email, setEmail] = useState("")
     const [senha, setSenha] = useState("")
+    const [loading, setLoading] = useState(false)
     const router = useRouter()
 
-    const login = () => {
+    const login = async () => {
         if (!email.trim()){
             Alert.alert("Erro", "Campo email é obrigatório")
             return
@@ -25,12 +27,24 @@ export default function Login() {
             return
         }
 
-        if (email === "admin" && senha === "murilo123") {
-            router.replace("/(initial)/home")
-        }else {
-            Alert.alert("Email ou senha inválidos")
-        }
+        try {
+            setLoading(true)
+            const response = await loginUser(email, senha)
 
+            Alert.alert(
+                "Sucesso",
+                response.message || "Login realizado com sucesso!",
+                [{ text: "OK", onPress: () => router.replace("/(initial)/home") }]
+            )
+        } catch (error) {
+            const message = error instanceof Error
+                ? error.message
+                : "Não foi possível realizar o login."
+
+            Alert.alert("Erro", message)
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -142,6 +156,7 @@ export default function Login() {
 
                 <Pressable
                     onPress={login}
+                    disabled={loading}
                     style={({ pressed }) => [
                         styles.button,
                         {
@@ -163,7 +178,7 @@ export default function Login() {
                             },
                         ]}
                     >
-                        Entrar
+                            {loading ? "Entrando..." : "Entrar"}
                     </Text>
                 </Pressable>
 
