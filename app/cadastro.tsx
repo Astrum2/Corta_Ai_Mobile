@@ -90,7 +90,7 @@ export default function Cadastro() {
         try {
             setLoading(true);
 
-            await registerUser({
+            const response = await registerUser({
                 name: nome,
                 email,
                 cpf,
@@ -104,7 +104,11 @@ export default function Cadastro() {
             setSenha("");
             setConfirmarSenha("");
 
-            router.replace("/login");
+            Alert.alert(
+                "Sucesso",
+                response.message || "Usuário criado!",
+                [{ text: "OK", onPress: () => router.replace("/login") }]
+            );
         } catch (error) {
             const message = error instanceof Error
                 ? error.message

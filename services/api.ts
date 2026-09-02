@@ -1,4 +1,4 @@
-const API_URL = "https://cortaai.local/api";
+const API_URL = process.env.EXPO_PUBLIC_URL;
 
 export type CreateUserData = {
     name: string;
@@ -21,12 +21,16 @@ export type User = {
     role?: Role;
 };
 
+export type RegisterUserResponse = User & {
+    message?: string;
+};
+
 type ApiError = {
     message?: string;
     error?: string;
 };
 
-export async function registerUser(userData: CreateUserData): Promise<User> {
+export async function registerUser(userData: CreateUserData): Promise<RegisterUserResponse> {
     const response = await fetch(`${API_URL}/users`, {
         method: "POST",
         headers: {
