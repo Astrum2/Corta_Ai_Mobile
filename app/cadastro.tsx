@@ -1,8 +1,9 @@
+import { FormField } from "@/components/formField";
 import { useTheme } from "@/contexts/theme";
 import { registerUser } from "@/services/api";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
 
@@ -159,180 +160,45 @@ export default function Cadastro() {
                         Cadastro
                     </Text>
 
-                    <View style={[styles.formGroup, { marginBottom: space[5] }]}>
-                        <Text
-                            style={[
-                                styles.label,
-                                {
-                                    color: theme.bodyColor,
-                                    fontFamily: font.baseMedium,
-                                    fontSize: fontSize.base,
-                                    marginBottom: space[2],
-                                },
-                            ]}
-                        >
-                            Nome:
-                        </Text>
+                    <FormField
+                        label="Nome:"
+                        value={nome}
+                        onChangeText={setNome}
+                        placeholder="Nome"
+                    />
 
-                        <TextInput
-                            style={[
-                                styles.input,
-                                {
-                                    color: inputTextColor,
-                                    backgroundColor: theme.tertiaryBg,
-                                    borderColor: theme.borderColor,
-                                    borderRadius: radius.base,
-                                    fontFamily: font.base,
-                                    fontSize: fontSize.lg,
-                                },
-                            ]}
-                            value={nome}
-                            onChangeText={setNome}
-                            placeholder="Nome"
-                            placeholderTextColor={inputTextColor}
-                        />
-                    </View>
+                    <FormField
+                        label="Email:"
+                        value={email}
+                        onChangeText={setEmail}
+                        placeholder="Email"
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                    />
 
-                    <View style={[styles.formGroup, { marginBottom: space[5] }]}>
-                        <Text
-                            style={[
-                                styles.label,
-                                {
-                                    color: theme.bodyColor,
-                                    fontFamily: font.baseMedium,
-                                    fontSize: fontSize.base,
-                                    marginBottom: space[2],
-                                },
-                            ]}
-                        >
-                            Email:
-                        </Text>
+                    <FormField
+                        label="CPF:"
+                        value={cpf}
+                        onChangeText={(value) => setCpf(formatCPF(value))}
+                        placeholder="000.000.000-00"
+                        keyboardType="numeric"
+                    />
 
-                        <TextInput
-                            style={[
-                                styles.input,
-                                {
-                                    color: inputTextColor,
-                                    backgroundColor: theme.tertiaryBg,
-                                    borderColor: theme.borderColor,
-                                    borderRadius: radius.base,
-                                    fontFamily: font.base,
-                                    fontSize: fontSize.lg,
-                                },
-                            ]}
-                            value={email}
-                            onChangeText={setEmail}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            placeholder="Email"
-                            placeholderTextColor={inputTextColor}
-                        />
-                    </View>
+                    <FormField
+                        label="Senha:"
+                        value={senha}
+                        onChangeText={setSenha}
+                        placeholder="Senha"
+                        secureTextEntry
+                    />
 
-                    <View style={[styles.formGroup, { marginBottom: space[5] }]}>
-                        <Text
-                            style={[
-                                styles.label,
-                                {
-                                    color: theme.bodyColor,
-                                    fontFamily: font.baseMedium,
-                                    fontSize: fontSize.base,
-                                    marginBottom: space[2],
-                                },
-                            ]}
-                        >
-                            CPF:
-                        </Text>
-
-                        <TextInput
-                            style={[
-                                styles.input,
-                                {
-                                    color: inputTextColor,
-                                    backgroundColor: theme.tertiaryBg,
-                                    borderColor: theme.borderColor,
-                                    borderRadius: radius.base,
-                                    fontFamily: font.base,
-                                    fontSize: fontSize.lg,
-                                },
-                            ]}
-                            value={cpf}
-                            onChangeText={(value) => setCpf(formatCPF(value))}
-                            keyboardType="numeric"
-                            placeholder="000.000.000-00"
-                            placeholderTextColor={inputTextColor}
-                        />
-                    </View>
-
-                    <View style={[styles.formGroup, { marginBottom: space[5] }]}>
-                        <Text
-                            style={[
-                                styles.label,
-                                {
-                                    color: theme.bodyColor,
-                                    fontFamily: font.baseMedium,
-                                    fontSize: fontSize.base,
-                                    marginBottom: space[2],
-                                },
-                            ]}
-                        >
-                            Senha:
-                        </Text>
-
-                        <TextInput
-                            style={[
-                                styles.input,
-                                {
-                                    color: inputTextColor,
-                                    backgroundColor: theme.tertiaryBg,
-                                    borderColor: theme.borderColor,
-                                    borderRadius: radius.base,
-                                    fontFamily: font.base,
-                                    fontSize: fontSize.lg,
-                                },
-                            ]}
-                            value={senha}
-                            onChangeText={setSenha}
-                            placeholder="Senha"
-                            placeholderTextColor={inputTextColor}
-                            secureTextEntry
-                        />
-                    </View>
-
-                    <View style={[styles.formGroup, { marginBottom: space[5] }]}>
-                        <Text
-                            style={[
-                                styles.label,
-                                {
-                                    color: theme.bodyColor,
-                                    fontFamily: font.baseMedium,
-                                    fontSize: fontSize.base,
-                                    marginBottom: space[2],
-                                },
-                            ]}
-                        >
-                            Confirmar senha:
-                        </Text>
-
-                        <TextInput
-                            style={[
-                                styles.input,
-                                {
-                                    color: inputTextColor,
-                                    backgroundColor: theme.tertiaryBg,
-                                    borderColor: theme.borderColor,
-                                    borderRadius: radius.base,
-                                    fontFamily: font.base,
-                                    fontSize: fontSize.lg,
-                                },
-                            ]}
-                            value={confirmarSenha}
-                            onChangeText={setConfirmarSenha}
-                            placeholder="Confirmar senha"
-                            placeholderTextColor={inputTextColor}
-                            secureTextEntry
-                        />
-                    </View>
+                    <FormField
+                        label="Confirmar senha:"
+                        value={confirmarSenha}
+                        onChangeText={setConfirmarSenha}
+                        placeholder="Confirmar senha"
+                        secureTextEntry
+                    />
 
                     <Pressable
                         onPress={cadastro}
@@ -367,7 +233,7 @@ export default function Cadastro() {
                             style={[
                                 styles.backLink,
                                 {
-                                    color: "#FFFFFF",
+                                    color: "#000000",
                                     fontFamily: font.baseMedium,
                                     fontSize: fontSize.base,
                                 },

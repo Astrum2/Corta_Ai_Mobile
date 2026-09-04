@@ -1,5 +1,6 @@
 import { useTheme } from "@/contexts/theme";
 import { Image } from "expo-image";
+import React from "react";
 import { View } from "react-native";
 
 type Props = {
