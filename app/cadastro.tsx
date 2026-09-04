@@ -253,6 +253,7 @@ const styles = StyleSheet.create({
     card: {
         width: "100%",
         maxWidth: 400,
+        marginBottom: 50,
         borderWidth: 1,
         ...Platform.select({
             ios: { shadowColor: "#0a0a0a", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 },
