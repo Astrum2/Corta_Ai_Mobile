@@ -1,513 +1,423 @@
-import { Button } from "@/components/button";
+import { FormField } from "@/components/formField";
 import { ProfilePicture } from "@/components/profile-picture";
-import { H2 } from "@/components/text";
 import { useTheme } from "@/contexts/theme";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  useWindowDimensions,
-} from "react-native";
-
-type ProfileForm = {
-  nome: string;
-  email: string;
-  telefone: string;
-  cpf: string;
-};
-
-const INITIAL_PROFILE: ProfileForm = {
-  nome: "João da Silva",
-  email: "joao@email.com",
-  telefone: "(41) 99999-9999",
-  cpf: "000.000.000-00",
-};
-
-const PROFILE_IMAGE =
-  "https://avatars.githubusercontent.com/u/106830297?v=4";
-
-const onlyDigits = (value: string) => value.replace(/\D/g, "");
-
-const formatCPF = (value: string) => {
-  const digits = onlyDigits(value).slice(0, 11);
-  return digits
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-};
-
-const formatTelefone = (value: string) => {
-  const digits = onlyDigits(value).slice(0, 11);
-
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-};
+import { formatCPF, formatPhone, useProfile } from "@/services/profile";
+import React from "react";
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
-  const { theme, font, fontSize, space, radius, currentColor, toggleTheme } =
-    useTheme();
-  const { width } = useWindowDimensions();
-  const router = useRouter();
-
-  const isWide = width >= 768;
-
-  const [form, setForm] = useState<ProfileForm>(INITIAL_PROFILE);
-  const [saved, setSaved] = useState(false);
-
-  const handleChange = (field: keyof ProfileForm, value: string) => {
-    setSaved(false);
-    setForm((previous) => ({ ...previous, [field]: value }));
-  };
+  const { currentColor, theme, font, fontSize, radius, space, toggleTheme } = useTheme();
+  const { form, role, isBarber, selectedPhoto, resolvedPhoto, loading, saving, loggingOut, status, changeField, setActive, pickPhoto, save, logout } = useProfile();
+console.log("Database photo:", form.photo);
+console.log("Selected photo:", selectedPhoto?.uri);
+console.log("Resolved photo:", resolvedPhoto);
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.bodyBg }]}>
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" color={theme.primary} />
+          <Text style={{
+            color: theme.secondaryColor,
+            fontFamily: font.base,
+            fontSize: fontSize.base,
+            marginTop: space[3],
+          }}>
+            Carregando perfil...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.screen, { backgroundColor: theme.bodyBg }]}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.bodyBg }]}>
       <ScrollView
         contentContainerStyle={[
           styles.page,
-          { paddingHorizontal: space[5], paddingVertical: isWide ? space[8] : space[6] },
+          { paddingHorizontal: space[4], paddingVertical: space[6] },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.container}>
-          <View style={[styles.header, { marginBottom: space[5] }]}>
-            <Text
-              style={{
-                marginBottom: space[2],
-                color: theme.primary,
-                fontFamily: font.baseSemibold,
-                fontSize: fontSize.sm,
-                letterSpacing: 2,
-                textTransform: "uppercase",
-                textAlign: "center",
-              }}
-            >
-              Minha conta
-            </Text>
+        <View style={[
+          styles.card,
+          {
+            backgroundColor: theme.secondaryBg,
+            borderColor: theme.bodyColor,
+            borderRadius: radius.lg,
+            padding: space[5],
+          },
+        ]}>
+          <Text style={[
+            styles.title,
+            {
+              color: theme.bodyColor,
+              fontFamily: font.baseBold,
+              fontSize: fontSize.h2,
+              marginBottom: space[4],
+            },
+          ]}>
+            Meu perfil
+          </Text>
 
-            <Text
-              style={{
-                color: theme.bodyColor,
-                fontFamily: font.baseBold,
-                fontSize: fontSize.h2,
-                textAlign: "center",
-                marginBottom: space[2],
-              }}
-            >
-              Perfil
-            </Text>
-
-            <Text
-              style={{
-                color: theme.secondaryColor,
-                fontFamily: font.base,
-                fontSize: fontSize.base,
-                lineHeight: 21,
-                textAlign: "center",
-              }}
-            >
-              Consulte e atualize suas informações pessoais.
-            </Text>
-          </View>
+          <View style={[
+            styles.identity,
+            {
+              borderBottomColor: theme.borderColor,
+              marginBottom: space[4],
+              paddingBottom: space[4],
+            },
+          ]}>
 
 
-          <View
-            style={[
-              styles.profileCard,
-              {
-                padding: isWide ? space[7] : space[5],
-                borderRadius: radius.xl,
-                borderColor: theme.borderColor,
-                backgroundColor: theme.secondaryBg,
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.identity,
-                {
-                  paddingBottom: space[5],
-                  marginBottom: space[5],
-                  borderBottomColor: theme.borderColor,
-                },
-              ]}
-            >
-              <ProfilePicture fotoUrl={PROFILE_IMAGE} />
+            {isBarber && (
+              <>
+                <ProfilePicture fotoUrl={resolvedPhoto ?? ""} />
 
-              <Text
-                style={{
-                  marginTop: space[3],
-                  color: theme.bodyColor,
-                  fontFamily: font.baseBold,
-                  fontSize: fontSize.h3,
-                }}
-              >
-                {form.nome}
-              </Text>
-
-              <Text
-                style={{
-                  marginTop: space[1],
-                  color: theme.secondaryColor,
-                  fontFamily: font.base,
-                  fontSize: fontSize.base,
-                }}
-              >
-                {form.email}
-              </Text>
-            </View>
-
-            <View style={[styles.section, { gap: space[4] }]}>
-              <H2>Informações pessoais</H2>
-
-              <View
-                style={[
-                  styles.formRow,
-                  {
-                    flexDirection: isWide ? "row" : "column",
-                    gap: space[4],
-                  },
-                ]}
-              >
-                <View style={styles.field}>
-                  <Text
-                    style={{
-                      marginBottom: space[2],
-                      color: theme.bodyColor,
-                      fontFamily: font.baseSemibold,
-                      fontSize: fontSize.base,
-                    }}
-                  >
-                    Nome
-                  </Text>
-                  <TextInput
-                    value={form.nome}
-                    onChangeText={(value) =>
-                      handleChange("nome", value)
-                    }
-                    placeholder="Seu nome"
-                    placeholderTextColor={theme.tertiaryColor}
-                    style={[
-                      styles.input,
-                      {
-                        paddingHorizontal: space[4],
-                        paddingVertical: space[3],
-                        borderRadius: radius.base,
-                        borderColor: theme.borderColor,
-                        backgroundColor: theme.tertiaryBg,
-                        color: theme.bodyColor,
-                        fontFamily: font.base,
-                        fontSize: fontSize.base,
-                      },
-                    ]}
-                  />
-                </View>
-
-                <View style={styles.field}>
-                  <Text
-                    style={{
-                      marginBottom: space[2],
-                      color: theme.bodyColor,
-                      fontFamily: font.baseSemibold,
-                      fontSize: fontSize.base,
-                    }}
-                  >
-                    E-mail
-                  </Text>
-                  <TextInput
-                    value={form.email}
-                    editable={false}
-                    style={[
-                      styles.input,
-                      {
-                        paddingHorizontal: space[4],
-                        paddingVertical: space[3],
-                        borderRadius: radius.base,
-                        borderColor: theme.borderColor,
-                        backgroundColor: theme.tertiaryBg,
-                        color: theme.tertiaryColor,
-                        fontFamily: font.base,
-                        fontSize: fontSize.base,
-                      },
-                    ]}
-                  />
-                </View>
-              </View>
-
-              <View
-                style={[
-                  styles.formRow,
-                  {
-                    flexDirection: isWide ? "row" : "column",
-                    gap: space[4],
-                  },
-                ]}
-              >
-                <View style={styles.field}>
-                  <Text
-                    style={{
-                      marginBottom: space[2],
-                      color: theme.bodyColor,
-                      fontFamily: font.baseSemibold,
-                      fontSize: fontSize.base,
-                    }}
-                  >
-                    Telefone
-                  </Text>
-                  <TextInput
-                    value={form.telefone}
-                    onChangeText={(value) => handleChange("telefone", formatTelefone(value))}
-                    placeholder="(00) 00000-0000"
-                    placeholderTextColor={theme.tertiaryColor}
-                    keyboardType="phone-pad"
-                    style={[
-                      styles.input,
-                      {
-                        paddingHorizontal: space[4],
-                        paddingVertical: space[3],
-                        borderRadius: radius.base,
-                        borderColor: theme.borderColor,
-                        backgroundColor: theme.tertiaryBg,
-                        color: theme.bodyColor,
-                        fontFamily: font.base,
-                        fontSize: fontSize.base,
-                      },
-                    ]}
-                  />
-                </View>
-
-                <View style={styles.field}>
-                  <Text
-                    style={{
-                      marginBottom: space[2],
-                      color: theme.bodyColor,
-                      fontFamily: font.baseSemibold,
-                      fontSize: fontSize.base,
-                    }}
-                  >
-                    CPF
-                  </Text>
-                  <TextInput
-                    value={form.cpf}
-                    onChangeText={(value) => handleChange("cpf", formatCPF(value))}
-                    placeholder="000.000.000-00"
-                    placeholderTextColor={theme.tertiaryColor}
-                    keyboardType="numeric"
-                    style={[
-                      styles.input,
-                      {
-                        paddingHorizontal: space[4],
-                        paddingVertical: space[3],
-                        borderRadius: radius.base,
-                        borderColor: theme.borderColor,
-                        backgroundColor: theme.tertiaryBg,
-                        color: theme.bodyColor,
-                        fontFamily: font.base,
-                        fontSize: fontSize.base,
-                      },
-                    ]}
-                  />
-                </View>
-              </View>
-
-              <View style={{ marginTop: space[2] }}>
-                <Button onPress={() => setSaved(true)}>
-                  Salvar alterações
-                </Button>
-              </View>
-
-              {saved && (
-                <View
-                  style={[
-                    styles.successBox,
+                <Pressable
+                  onPress={pickPhoto}
+                  style={({ pressed }) => [
+                    styles.photoButton,
                     {
-                      marginTop: space[2],
-                      padding: space[3],
+                      borderColor: theme.borderColor,
                       borderRadius: radius.base,
-                      borderColor: theme.success,
-                      backgroundColor: theme.tertiaryBg,
+                      marginTop: space[2],
+                      backgroundColor: pressed
+                        ? theme.tertiaryBg
+                        : theme.secondaryBg,
                     },
                   ]}
                 >
-                  <Text
-                    style={{
-                      color: theme.success,
-                      fontFamily: font.baseMedium,
-                      fontSize: fontSize.base,
-                      textAlign: "center",
-                    }}
-                  >
-                    Alterações salvas localmente.
+                  <Text style={{
+                    color: theme.bodyColor,
+                    fontFamily: font.baseMedium,
+                    fontSize: fontSize.base,
+                  }}>
+                    Alterar foto
                   </Text>
-                </View>
-              )}
-            </View>
+                </Pressable>
+              </>
+            )}
+
+            <Text style={{
+              color: theme.bodyColor,
+              fontFamily: font.baseBold,
+              fontSize: fontSize.h4,
+              marginTop: space[3],
+            }}>
+              {form.name || "Usuário"}
+            </Text>
+
+            <Text style={{
+              color: theme.secondaryColor,
+              fontFamily: font.base,
+              fontSize: fontSize.base,
+              marginTop: space[1],
+            }}>
+              {form.email}
+            </Text>
+
+            {role?.name && (
+              <Text style={{
+                color: theme.primary,
+                fontFamily: font.baseSemibold,
+                fontSize: fontSize.sm,
+                marginTop: space[1],
+              }}>
+                {role.name}
+              </Text>
+            )}
           </View>
 
-          <View
-            style={[
-              styles.bottomGrid,
+          <Text style={[
+            styles.sectionTitle,
+            {
+              color: theme.bodyColor,
+              fontFamily: font.baseSemibold,
+              fontSize: fontSize.lg,
+              marginBottom: space[3],
+            },
+          ]}>
+            Dados da conta
+          </Text>
+
+          <FormField
+            label="Nome:"
+            value={form.name}
+            onChangeText={(value) => changeField("name", value)}
+            placeholder="Nome"
+            autoCapitalize="words"
+          />
+          <FormField
+            label="Email:"
+            value={form.email}
+            onChangeText={(value) => changeField("email", value)}
+            placeholder="Email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <FormField
+            label="CPF:"
+            value={form.cpf}
+            onChangeText={(value) => changeField("cpf", formatCPF(value))}
+            placeholder="000.000.000-00"
+            keyboardType="numeric"
+            maxLength={14}
+          />
+          <FormField
+            label="Nova senha:"
+            value={form.password}
+            onChangeText={(value) => changeField("password", value)}
+            placeholder="Deixe vazio para manter a senha"
+            secureTextEntry
+            autoCapitalize="none"
+          />
+          <FormField
+            label="Confirmar nova senha:"
+            value={form.confirmPassword}
+            onChangeText={(value) => changeField("confirmPassword", value)}
+            placeholder="Repita a nova senha"
+            secureTextEntry
+            autoCapitalize="none"
+          />
+
+          {isBarber && (
+            <View style={[
+              styles.barberSection,
               {
-                marginTop: space[5],
-                flexDirection: isWide ? "row" : "column",
-                gap: space[4],
+                borderTopColor: theme.borderColor,
+                marginTop: space[2],
+                paddingTop: space[4],
+              },
+            ]}>
+              <Text style={[
+                styles.sectionTitle,
+                {
+                  color: theme.bodyColor,
+                  fontFamily: font.baseSemibold,
+                  fontSize: fontSize.lg,
+                  marginBottom: space[3],
+                },
+              ]}>
+                Dados do barbeiro
+              </Text>
+
+              <FormField
+                label="Telefone:"
+                value={form.phone}
+                onChangeText={(value) => changeField("phone", formatPhone(value))}
+                placeholder="(00) 00000-0000"
+                keyboardType="phone-pad"
+                maxLength={15}
+              />
+
+              <View style={[
+                styles.switchRow,
+                {
+                  backgroundColor: theme.tertiaryBg,
+                  borderColor: theme.borderColor,
+                  borderRadius: radius.base,
+                  marginBottom: space[3],
+                  padding: space[3],
+                },
+              ]}>
+                <View style={styles.switchText}>
+                  <Text style={{
+                    color: theme.bodyColor,
+                    fontFamily: font.baseMedium,
+                    fontSize: fontSize.base,
+                  }}>
+                    Perfil ativo
+                  </Text>
+                  <Text style={{
+                    color: theme.secondaryColor,
+                    fontFamily: font.base,
+                    fontSize: fontSize.sm,
+                    marginTop: space[1],
+                  }}>
+                    Define se você aparece como barbeiro ativo.
+                  </Text>
+                </View>
+                <Switch value={form.active} onValueChange={setActive} />
+              </View>
+
+              {selectedPhoto && (
+                <Text style={{
+                  color: theme.secondaryColor,
+                  fontFamily: font.base,
+                  fontSize: fontSize.sm,
+                  marginBottom: space[3],
+                }}>
+                  Nova foto: {selectedPhoto.fileName}
+                </Text>
+              )}
+            </View>
+          )}
+
+          {status && (
+            <View style={[
+              styles.status,
+              {
+                backgroundColor: theme.tertiaryBg,
+                borderColor: status.type === "success"
+                  ? theme.success
+                  : theme.danger,
+                borderRadius: radius.base,
+                marginBottom: space[3],
+                padding: space[3],
+              },
+            ]}>
+              <Text style={{
+                color: status.type === "success"
+                  ? theme.success
+                  : theme.danger,
+                fontFamily: font.baseMedium,
+                fontSize: fontSize.base,
+                textAlign: "center",
+              }}>
+                {status.message}
+              </Text>
+            </View>
+          )}
+
+          <Pressable
+            onPress={save}
+            disabled={saving}
+            style={({ pressed }) => [
+              styles.button,
+              {
+                backgroundColor: pressed
+                  ? theme.secondaryColor
+                  : theme.bodyColor,
+                borderRadius: radius.base,
+                marginBottom: space[3],
               },
             ]}
           >
-            <View
-              style={[
-                styles.secondaryCard,
-                {
-                  padding: space[5],
-                  borderRadius: radius.lg,
-                  borderColor: theme.borderColor,
-                  backgroundColor: theme.secondaryBg,
-                },
-              ]}
-            >
-              <H2>Preferências</H2>
-              <Text
-                style={{
-                  marginVertical: space[3],
-                  color: theme.secondaryColor,
-                  fontFamily: font.base,
-                  fontSize: fontSize.base,
-                }}
-              >
-                Tema atual:{" "}
-                {currentColor === "dark" ? "Escuro" : "Claro"}
-              </Text>
-              <View style={styles.actionWrap}>
-                <Button onPress={toggleTheme}>Trocar tema</Button>
-              </View>
-            </View>
+            <Text style={[
+              styles.buttonText,
+              {
+                color: theme.secondaryBg,
+                fontFamily: font.baseSemibold,
+                fontSize: fontSize.lg,
+              },
+            ]}>
+              {saving ? "Salvando..." : "Salvar alterações"}
+            </Text>
+          </Pressable>
 
-            <View
-              style={[
-                styles.secondaryCard,
-                {
-                  padding: space[5],
-                  borderRadius: radius.lg,
-                  borderColor: theme.borderColor,
-                  backgroundColor: theme.secondaryBg,
-                },
-              ]}
-            >
-              <H2>Sessão</H2>
-              <Text
-                style={{
-                  marginVertical: space[3],
-                  color: theme.secondaryColor,
-                  fontFamily: font.base,
-                  fontSize: fontSize.base,
-                }}
-              >
-                Retorne à tela de login.
-              </Text>
-              <View style={styles.actionWrap}>
-                <Button onPress={() => router.replace("/login")}>Sair da conta</Button>
-              </View>
-            </View>
-          </View>
+          <Pressable
+            onPress={toggleTheme}
+            style={({ pressed }) => [
+              styles.secondaryButton,
+              {
+                backgroundColor: pressed
+                  ? theme.tertiaryBg
+                  : theme.secondaryBg,
+                borderColor: theme.borderColor,
+                borderRadius: radius.base,
+                marginBottom: space[3],
+              },
+            ]}
+          >
+            <Text style={{
+              color: theme.bodyColor,
+              fontFamily: font.baseMedium,
+              fontSize: fontSize.base,
+            }}>
+              Tema: {currentColor === "dark" ? "Escuro" : "Claro"}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => logout()}
+            disabled={loggingOut}
+            style={[
+              styles.button,
+              {
+                backgroundColor: theme.danger,
+                borderRadius: radius.base,
+              },
+            ]}
+          >
+            <Text style={[
+              styles.buttonText,
+              {
+                color: "#FFFFFF",
+                fontFamily: font.baseSemibold,
+                fontSize: fontSize.lg,
+              },
+            ]}>
+              {loggingOut ? "Saindo..." : "Sair da conta"}
+            </Text>
+          </Pressable>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  page: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: 24,
-  },
-  container: {
-    width: "100%",
-    maxWidth: 440,
-    alignSelf: "center",
-  },
-  header: {
-    width: "100%",
-    alignItems: "center",
-  },
-  profileCard: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    backgroundColor: "#ffffff",
-    padding: 20,
-    borderRadius: 16,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 5,
-    elevation: 1,
-  },
+  safeArea: { flex: 1 },
+  page: { flexGrow: 1, alignItems: "center" },
+  loading: { flex: 1, alignItems: "center", justifyContent: "center" },
+  title: { textAlign: "left" },
   identity: {
     width: "100%",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-    paddingBottom: 16,
-    marginBottom: 16,
   },
-  section: {
-    width: "100%",
-  },
-  formRow: {
-    width: "100%",
-  },
-  field: {
-    flex: 1,
-    width: "100%",
-  },
-  input: {
-    width: "100%",
-    minHeight: 48,
-    borderWidth: 1,
-    borderColor: "#d9d9d9",
-    backgroundColor: "#f8f8f8",
-  },
-  successBox: {
+  sectionTitle: { width: "100%" },
+  barberSection: { width: "100%", borderTopWidth: 1 },
+  switchRow: {
     width: "100%",
     borderWidth: 1,
-    borderColor: "#7dd3a8",
-    backgroundColor: "#f0fdf4",
-  },
-  bottomGrid: {
-    width: "100%",
-    alignItems: "stretch",
-  },
-  secondaryCard: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    backgroundColor: "#ffffff",
-    padding: 20,
-    borderRadius: 16,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    elevation: 0.5,
-  },
-  actionWrap: {
-    width: "100%",
+    flexDirection: "row",
     alignItems: "center",
-    marginTop: 4,
+  },
+  switchText: { flex: 1, marginRight: 12 },
+  status: { width: "100%", borderWidth: 1 },
+  photoButton: {
+    minHeight: 38,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  button: {
+    width: "100%",
+    minHeight: 46,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  secondaryButton: {
+    width: "100%",
+    minHeight: 46,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  buttonText: { textAlign: "center" },
+  card: {
+    width: "100%",
+    maxWidth: 500,
+    borderWidth: 1,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#0a0a0a",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
+      android: { elevation: 4 },
+      web: { boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.10)" },
+    }),
   },
 });

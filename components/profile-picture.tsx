@@ -22,13 +22,9 @@ export const ProfilePicture = (props: Props) => {
             }}
         >
             <Image
-                source={{
-                    uri: props.fotoUrl
-                }}
-                style={{
-                    width: "100%",
-                    height: "100%"
-                }}
+                source={{ uri: props.fotoUrl }}
+                onError={(error) => console.log("Image error:", error.error)}
+                style={{ width: "100%", height: "100%" }}
             />
         </View>
     );
