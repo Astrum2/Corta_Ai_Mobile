@@ -213,14 +213,19 @@ export function useProfile() {
             }
 
             const user = normalizeProfile(data);
-            let barber = user.barber ?? null;
-            const barberResponse = await authenticatedFetch(BARBER_PROFILE_ENDPOINT);
+            const roleName = user.role?.name?.trim().toLowerCase() ?? "";
+            const userIsBarber = roleName === "barber" || roleName === "barbeiro";
+            let barber = userIsBarber ? user.barber ?? null : null;
 
-            if (await handleUnauthorized(barberResponse)) return;
+            if (userIsBarber) {
+                const barberResponse = await authenticatedFetch(BARBER_PROFILE_ENDPOINT);
 
-            if (barberResponse.ok) {
-                const barberData = await readBody(barberResponse);
-                barber = normalizeBarberProfile(barberData) ?? barber;
+                if (await handleUnauthorized(barberResponse)) return;
+
+                if (barberResponse.ok) {
+                    const barberData = await readBody(barberResponse);
+                    barber = normalizeBarberProfile(barberData) ?? barber;
+                }
             }
 
             setRole(user.role ?? null);
