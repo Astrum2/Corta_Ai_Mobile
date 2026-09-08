@@ -13,13 +13,6 @@ export default function Layout() {
                 }}
             />
             <Tabs.Screen 
-                name="profile"
-                options={{
-                    title: "Profile",
-                    tabBarIcon: ({ color }) => <FontAwesome size={18} name="user" color={color} />
-                }}
-            />
-            <Tabs.Screen 
                 name="sobre"
                 options={{
                     title: "Sobre",
@@ -31,6 +24,13 @@ export default function Layout() {
                 options={{
                     title: "Serviços",
                     tabBarIcon: ({ color }) => <FontAwesome size={18} name="home" color={color} />
+                }}
+            />
+             <Tabs.Screen 
+                name="profile"
+                options={{
+                    title: "Profile",
+                    tabBarIcon: ({ color }) => <FontAwesome size={18} name="user" color={color} />
                 }}
             />
         </Tabs>
