@@ -3,7 +3,7 @@ import { useTheme } from "@/contexts/theme";
 import { registerUser } from "@/services/api";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
 
@@ -122,129 +122,133 @@ export default function Cadastro() {
     };
 
     return (
-
-        <ScrollView
-            keyboardShouldPersistTaps="handled"
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
         >
-            <View
-                style={[
-                    styles.page,
-                    {
-                        backgroundColor: theme.bodyBg,
-                        paddingHorizontal: space[4],
-                    },
-                ]}
+            <ScrollView
+                keyboardShouldPersistTaps="handled"
             >
                 <View
                     style={[
-                        styles.card,
+                        styles.page,
                         {
-                            backgroundColor: theme.secondaryBg,
-                            borderColor: theme.bodyColor,
-                            borderRadius: radius.lg,
-                            padding: space[7],
+                            backgroundColor: theme.bodyBg,
+                            paddingHorizontal: space[4],
                         },
                     ]}
                 >
-                    <Text
+                    <View
                         style={[
-                            styles.title,
+                            styles.card,
                             {
-                                color: theme.bodyColor,
-                                fontFamily: font.baseBold,
-                                fontSize: fontSize.h2,
-                                marginBottom: space[6],
-                            },
-                        ]}
-                    >
-                        Cadastro
-                    </Text>
-
-                    <FormField
-                        label="Nome:"
-                        value={nome}
-                        onChangeText={setNome}
-                        placeholder="Nome"
-                    />
-
-                    <FormField
-                        label="Email:"
-                        value={email}
-                        onChangeText={setEmail}
-                        placeholder="Email"
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                    />
-
-                    <FormField
-                        label="CPF:"
-                        value={cpf}
-                        onChangeText={(value) => setCpf(formatCPF(value))}
-                        placeholder="000.000.000-00"
-                        keyboardType="numeric"
-                    />
-
-                    <FormField
-                        label="Senha:"
-                        value={senha}
-                        onChangeText={setSenha}
-                        placeholder="Senha"
-                        secureTextEntry
-                    />
-
-                    <FormField
-                        label="Confirmar senha:"
-                        value={confirmarSenha}
-                        onChangeText={setConfirmarSenha}
-                        placeholder="Confirmar senha"
-                        secureTextEntry
-                    />
-
-                    <Pressable
-                        onPress={cadastro}
-                        disabled={loading}
-                        style={({ pressed }) => [
-                            styles.button,
-                            {
-                                backgroundColor: pressed ? theme.secondaryColor : theme.bodyColor,
-                                borderRadius: radius.base,
+                                backgroundColor: theme.secondaryBg,
+                                borderColor: theme.bodyColor,
+                                borderRadius: radius.lg,
+                                padding: space[7],
                             },
                         ]}
                     >
                         <Text
                             style={[
-                                styles.buttonText,
+                                styles.title,
                                 {
-                                    color: theme.secondaryBg,
-                                    fontFamily: font.baseSemibold,
-                                    fontSize: fontSize.lg,
+                                    color: theme.bodyColor,
+                                    fontFamily: font.baseBold,
+                                    fontSize: fontSize.h2,
+                                    marginBottom: space[6],
                                 },
                             ]}
                         >
-                            {loading ? "Cadastrando..." : "Cadastrar"}
+                            Cadastro
                         </Text>
-                    </Pressable>
 
-                    <Pressable
-                        onPress={() => router.replace("/login")}
-                        style={{ marginTop: space[4] }}
-                    >
-                        <Text
-                            style={[
-                                styles.backLink,
+                        <FormField
+                            label="Nome:"
+                            value={nome}
+                            onChangeText={setNome}
+                            placeholder="Nome"
+                        />
+
+                        <FormField
+                            label="Email:"
+                            value={email}
+                            onChangeText={setEmail}
+                            placeholder="Email"
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                        />
+
+                        <FormField
+                            label="CPF:"
+                            value={cpf}
+                            onChangeText={(value) => setCpf(formatCPF(value))}
+                            placeholder="000.000.000-00"
+                            keyboardType="numeric"
+                        />
+
+                        <FormField
+                            label="Senha:"
+                            value={senha}
+                            onChangeText={setSenha}
+                            placeholder="Senha"
+                            secureTextEntry
+                        />
+
+                        <FormField
+                            label="Confirmar senha:"
+                            value={confirmarSenha}
+                            onChangeText={setConfirmarSenha}
+                            placeholder="Confirmar senha"
+                            secureTextEntry
+                        />
+
+                        <Pressable
+                            onPress={cadastro}
+                            disabled={loading}
+                            style={({ pressed }) => [
+                                styles.button,
                                 {
-                                    color: "#000000",
-                                    fontFamily: font.baseMedium,
-                                    fontSize: fontSize.base,
+                                    backgroundColor: pressed ? theme.secondaryColor : theme.bodyColor,
+                                    borderRadius: radius.base,
                                 },
                             ]}
                         >
-                            Já possui conta? Entrar
-                        </Text>
-                    </Pressable>
+                            <Text
+                                style={[
+                                    styles.buttonText,
+                                    {
+                                        color: theme.secondaryBg,
+                                        fontFamily: font.baseSemibold,
+                                        fontSize: fontSize.lg,
+                                    },
+                                ]}
+                            >
+                                {loading ? "Cadastrando..." : "Cadastrar"}
+                            </Text>
+                        </Pressable>
+
+                        <Pressable
+                            onPress={() => router.replace("/login")}
+                            style={{ marginTop: space[4] }}
+                        >
+                            <Text
+                                style={[
+                                    styles.backLink,
+                                    {
+                                        color: "#000000",
+                                        fontFamily: font.baseMedium,
+                                        fontSize: fontSize.base,
+                                    },
+                                ]}
+                            >
+                                Já possui conta? Entrar
+                            </Text>
+                        </Pressable>
+                    </View>
                 </View>
-            </View>
-        </ScrollView>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 
