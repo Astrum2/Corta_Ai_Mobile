@@ -228,23 +228,36 @@ export default function Cadastro() {
                             </Text>
                         </Pressable>
 
-                        <Pressable
-                            onPress={() => router.replace("/login")}
-                            style={{ marginTop: space[4] }}
+                        <View
+                            style={[
+                                styles.registerRow,
+                                { marginTop: space[4] },
+                            ]}
                         >
                             <Text
-                                style={[
-                                    styles.backLink,
-                                    {
-                                        color: "#000000",
-                                        fontFamily: font.baseMedium,
-                                        fontSize: fontSize.base,
-                                    },
-                                ]}
+                                style={{
+                                    color: theme.secondaryColor,
+                                    fontFamily: font.base,
+                                    fontSize: fontSize.base,
+                                }}
                             >
-                                Já possui conta? Entrar
+                                Já tem uma conta?{" "}
                             </Text>
-                        </Pressable>
+                            <Pressable onPress={() => router.push("/login")}>
+                                <Text
+                                    style={[
+                                        styles.registerLink,
+                                        {
+                                            color: "#000000",
+                                            fontFamily: font.baseMedium,
+                                            fontSize: fontSize.base,
+                                        },
+                                    ]}
+                                >
+                                    Entre
+                                </Text>
+                            </Pressable>
+                        </View>
                     </View>
                 </View>
             </ScrollView>
@@ -272,4 +285,6 @@ const styles = StyleSheet.create({
     button: { width: "100%", minHeight: 46, justifyContent: "center", alignItems: "center", paddingHorizontal: 12, paddingVertical: 12 },
     buttonText: { textAlign: "center" },
     backLink: { textAlign: "center", textDecorationLine: "underline" },
+    registerLink: { textDecorationLine: "underline" }, 
+    registerRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", alignItems: "center" }
 });
