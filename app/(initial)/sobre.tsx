@@ -2,45 +2,48 @@ import { FlatList, StyleSheet, Text, View, useWindowDimensions } from "react-nat
 
 import Card, { type Barbeiro } from "@/components/cardBarber";
 import { useTheme } from "@/contexts/theme";
-import React from "react";
-
-const BARBEIROS: Barbeiro[] = [
-  {
-    id: 1,
-    name: "João Barbeiro",
-    photo:
-      "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=900&q=80",
-  },
-    {
-    id: 2,
-    name: "João Barbeiro",
-    photo:
-      "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=900&q=80",
-  },
-    {
-    id: 3,
-    name: "João Barbeiro",
-    photo:
-      "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=900&q=80",
-  },
-    {
-    id: 4,
-    name: "João Barbeiro",
-    photo:
-      "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=900&q=80",
-  },
-];
+import { getBarbers } from "@/services/barbers";
+import React, { useEffect, useState } from "react";
 
 export default function Sobre() {
   const { width } = useWindowDimensions();
   const { theme, font, fontSize, space } = useTheme();
+  const [barbeiros, setBarbeiros] = useState<Barbeiro[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadBarbeiros() {
+      try {
+        const data = await getBarbers();
+        if (active) setBarbeiros(data);
+      } catch (requestError) {
+        if (active) {
+          setError(
+            requestError instanceof Error
+              ? requestError.message
+              : "Não foi possível carregar os barbeiros.",
+          );
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadBarbeiros();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const columns = width >= 680 ? 2 : 1;
 
   return (
     <FlatList
       key={columns}
-      data={BARBEIROS}
+      data={barbeiros}
       keyExtractor={(item) => String(item.id)}
       numColumns={columns}
       contentContainerStyle={[
@@ -113,7 +116,20 @@ export default function Sobre() {
           <Card barbeiro={item} />
         </View>
       )}
-      ListEmptyComponent={
+      ListEmptyComponent={loading || error ? (
+        <Text
+          style={[
+            styles.status,
+            {
+              color: theme.secondaryColor,
+              fontFamily: font.baseSemibold,
+              fontSize: fontSize.base,
+            },
+          ]}
+        >
+          {loading ? "Carregando barbeiros..." : error}
+        </Text>
+      ) : (
         <Text
           style={[
             styles.status,
@@ -126,7 +142,7 @@ export default function Sobre() {
         >
           Nenhum barbeiro encontrado.
         </Text>
-      }
+      )}
     />
   );
 }

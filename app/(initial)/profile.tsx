@@ -9,9 +9,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Profile() {
   const { currentColor, theme, font, fontSize, radius, space, toggleTheme } = useTheme();
   const { form, role, isBarber, selectedPhoto, resolvedPhoto, loading, saving, loggingOut, status, changeField, setActive, pickPhoto, save, logout } = useProfile();
-console.log("Database photo:", form.photo);
-console.log("Selected photo:", selectedPhoto?.uri);
-console.log("Resolved photo:", resolvedPhoto);
   if (loading) {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.bodyBg }]}>
