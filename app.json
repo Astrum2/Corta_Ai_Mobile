@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "turmalegal",
-    "slug": "turmalegal",
+    "name": "Corta Ai",
+    "slug": "Corta Ai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "turmalegal",
+    "scheme": "Corta Ai",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
