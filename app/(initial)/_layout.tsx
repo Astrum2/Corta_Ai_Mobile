@@ -33,6 +33,13 @@ export default function Layout() {
                     tabBarIcon: ({ color }) => <FontAwesome size={18} name="user" color={color} />
                 }}
             />
+             <Tabs.Screen 
+                name="agendamento"
+                options={{
+                    title: "Agendamento",
+                    tabBarIcon: ({ color }) => <FontAwesome size={18} name="user" color={color} />
+                }}
+            />
         </Tabs>
         
     )
