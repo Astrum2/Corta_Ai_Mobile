@@ -1,18 +1,18 @@
 import { useTheme } from "@/contexts/theme";
 import React from "react";
-import { Text, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity, TouchableOpacityProps } from "react-native";
 
-type Props = {
-  onPress: () => void;
+type Props = TouchableOpacityProps & {
   children: string;
 };
 
-export const Button = ({ onPress, children }: Props) => {
+export const Button = ({ onPress, children, disabled }: Props) => {
   const { theme, font, fontSize, radius } = useTheme();
 
   return (
     <TouchableOpacity
       onPress={onPress}
+      disabled={disabled}
       style={{
         backgroundColor: theme.primary,
         width: 170,
@@ -23,6 +23,7 @@ export const Button = ({ onPress, children }: Props) => {
         alignSelf: "center",
         paddingHorizontal: 18,
         paddingVertical: 10,
+        opacity: disabled ? 0.55 : 1,
       }}
     >
       <Text
