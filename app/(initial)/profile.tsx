@@ -3,12 +3,14 @@ import { ProfilePicture } from "@/components/profile-picture";
 import { useTheme } from "@/contexts/theme";
 import { formatCPF, formatPhone } from "@/services/formatters";
 import { useProfile } from "@/services/profile";
+import { useRouter } from "expo-router";
 import React from "react";
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
   const { currentColor, theme, font, fontSize, radius, space, toggleTheme } = useTheme();
+  const router = useRouter();
   const { form, role, isBarber, selectedPhoto, resolvedPhoto, loading, saving, loggingOut, status, changeField, setActive, pickPhoto, save, logout } = useProfile();
   if (loading) {
     return (
@@ -303,6 +305,29 @@ export default function Profile() {
               },
             ]}>
               {saving ? "Salvando..." : "Salvar alterações"}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => router.push("./meus-agendamentos")}
+            style={({ pressed }) => [
+              styles.secondaryButton,
+              {
+                backgroundColor: pressed
+                  ? theme.tertiaryBg
+                  : theme.secondaryBg,
+                borderColor: theme.borderColor,
+                borderRadius: radius.base,
+                marginBottom: space[3],
+              },
+            ]}
+          >
+            <Text style={{
+              color: theme.bodyColor,
+              fontFamily: font.baseMedium,
+              fontSize: fontSize.base,
+            }}>
+              Meus agendamentos
             </Text>
           </Pressable>
 
