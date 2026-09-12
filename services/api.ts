@@ -1,3 +1,5 @@
+import { onlyDigits } from "./formatters";
+
 const API_URL = process.env.EXPO_PUBLIC_URL
 
 
@@ -115,7 +117,7 @@ export async function registerUser(userData: CreateUserData): Promise<RegisterUs
         body: JSON.stringify({
             name: userData.name.trim(),
             email: userData.email.trim().toLowerCase(),
-            cpf: userData.cpf.replace(/\D/g, ""),
+            cpf: onlyDigits(userData.cpf),
             password: userData.password,
         }),
     });

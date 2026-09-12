@@ -1,5 +1,6 @@
 import API_URL from "@/services/api";
 import { clearAuthToken, getAuthToken } from "@/services/auth";
+import { formatCPF, formatPhone, onlyDigits } from "@/services/formatters";
 import { File } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -65,25 +66,6 @@ const EMPTY_FORM: ProfileForm = {
     phone: "",
     active: true,
     photo: null,
-};
-
-export const onlyDigits = (value: string) => value.replace(/\D/g, "");
-
-export const formatCPF = (value: string) =>
-    onlyDigits(value)
-        .slice(0, 11)
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-
-export const formatPhone = (value: string) => {
-    const digits = onlyDigits(value).slice(0, 11);
-    if (digits.length <= 2) return digits;
-    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-    if (digits.length <= 10) {
-        return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-    }
-    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 };
 
 function apiMessage(data: unknown, fallback: string) {

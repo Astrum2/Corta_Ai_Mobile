@@ -1,17 +1,7 @@
 import { normalizeArray, parseResponse, requireApiUrl } from "./api";
 import { getAuthToken } from "./auth";
-
-export type Service = {
-    id: number;
-    name: string;
-    price?: number | string;
-    duration?: number;
-};
-
-export type Barber = {
-    id: number;
-    name: string;
-};
+import { type Barber } from "./barbers";
+import type { Service } from "./serviceList";
 
 export type AppointmentStatus =
     | "scheduled"
@@ -66,59 +56,6 @@ function buildTimeSlots(): string[] {
 }
 
 export const TIME_SLOTS = buildTimeSlots();
-
-export function formatDateInput(value: string): string {
-    const digits = value.replace(/\D/g, "").slice(0, 8);
-
-    if (digits.length <= 2) {
-        return digits;
-    }
-
-    if (digits.length <= 4) {
-        return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-    }
-
-    return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
-}
-
-export function parseDateInput(value: string): string | null {
-    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
-        return null;
-    }
-
-    const [day, month, year] = value.split("/").map(Number);
-    const date = new Date(year, month - 1, day);
-
-    if (
-        date.getFullYear() !== year ||
-        date.getMonth() !== month - 1 ||
-        date.getDate() !== day
-    ) {
-        return null;
-    }
-
-    return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
-
-export async function getServices(): Promise<Service[]> {
-    const response = await fetch(`${requireApiUrl()}/services`);
-    const payload = await parseResponse<unknown>(
-        response,
-        "Não foi possível carregar os serviços."
-    );
-
-    return normalizeArray<Service>(payload, ["services", "servicos"]);
-}
-
-export async function getBarbers(): Promise<Barber[]> {
-    const response = await fetch(`${requireApiUrl()}/barbers`);
-    const payload = await parseResponse<unknown>(
-        response,
-        "Não foi possível carregar os barbeiros."
-    );
-
-    return normalizeArray<Barber>(payload, ["barbers", "barbeiros"]);
-}
 
 export async function getAppointments(): Promise<Appointment[]> {
     const response = await fetch(`${requireApiUrl()}/appointments`);

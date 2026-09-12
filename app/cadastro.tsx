@@ -1,19 +1,10 @@
 import { FormField } from "@/components/formField";
 import { useTheme } from "@/contexts/theme";
 import { registerUser } from "@/services/api";
+import { formatCPF, onlyDigits } from "@/services/formatters";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-
-const onlyDigits = (value: string) => value.replace(/\D/g, "");
-
-const formatCPF = (value: string) => {
-    const digits = onlyDigits(value).slice(0, 11);
-    return digits
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-};
 
 const isValidCPF = (value: string) => {
     const cpf = onlyDigits(value);

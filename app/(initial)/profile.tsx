@@ -1,7 +1,8 @@
 import { FormField } from "@/components/formField";
 import { ProfilePicture } from "@/components/profile-picture";
 import { useTheme } from "@/contexts/theme";
-import { formatCPF, formatPhone, useProfile } from "@/services/profile";
+import { formatCPF, formatPhone } from "@/services/formatters";
+import { useProfile } from "@/services/profile";
 import React from "react";
 import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

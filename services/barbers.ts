@@ -6,6 +6,7 @@ export type Barber = {
     id: number;
     name: string;
     photo: string;
+    active: boolean;
 };
 
 type ApiError = {
@@ -50,6 +51,7 @@ function normalizeBarber(value: unknown): Barber | null {
         id: Number(id),
         name,
         photo: photoUrl(barber.photo ?? user?.photo),
+        active: barber.active === true,
     };
 }
 
@@ -83,5 +85,5 @@ export async function getBarbers(): Promise<Barber[]> {
 
     return items
         .map(normalizeBarber)
-        .filter((barber): barber is Barber => barber !== null);
+        .filter((barber): barber is Barber => barber !== null && barber.active === true);
 }
