@@ -331,6 +331,31 @@ export default function Profile() {
             </Text>
           </Pressable>
 
+          {isBarber && (
+            <Pressable
+              onPress={() => router.push("./agenda-barbeiro")}
+              style={({ pressed }) => [
+                styles.secondaryButton,
+                {
+                  backgroundColor: pressed
+                    ? theme.tertiaryBg
+                    : theme.secondaryBg,
+                  borderColor: theme.borderColor,
+                  borderRadius: radius.base,
+                  marginBottom: space[3],
+                },
+              ]}
+            >
+              <Text style={{
+                color: theme.bodyColor,
+                fontFamily: font.baseMedium,
+                fontSize: fontSize.base,
+              }}>
+                Agenda do barbeiro
+              </Text>
+            </Pressable>
+          )}
+
           <Pressable
             onPress={toggleTheme}
             style={({ pressed }) => [

@@ -48,6 +48,14 @@ export default function Layout() {
                     title: "Meus agendamentos",
                 }}
             />
+
+            <Tabs.Screen
+                name="agenda-barbeiro"
+                options={{
+                    href: null,
+                    title: "Agenda do Barbeiro",
+                }}
+            />
         </Tabs>
 
     )
