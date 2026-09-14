@@ -133,7 +133,9 @@ export default function Cadastro() {
                         style={[
                             styles.card,
                             {
-                                backgroundColor: theme.secondaryBg,
+                                    backgroundColor: currentColor === "dark"
+                                        ? "#141414"
+                                        : theme.secondaryBg,
                                 borderColor: theme.bodyColor,
                                 borderRadius: radius.lg,
                                 padding: space[7],
@@ -200,7 +202,7 @@ export default function Cadastro() {
                             style={({ pressed }) => [
                                 styles.button,
                                 {
-                                    backgroundColor: pressed ? theme.secondaryColor : theme.bodyColor,
+                                    backgroundColor: pressed ? "#760000" : "#980000",
                                     borderRadius: radius.base,
                                 },
                             ]}
@@ -239,7 +241,7 @@ export default function Cadastro() {
                                     style={[
                                         styles.registerLink,
                                         {
-                                            color: "#000000",
+                                            color: "#FFFFFF",
                                             fontFamily: font.baseMedium,
                                             fontSize: fontSize.base,
                                         },

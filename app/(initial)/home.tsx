@@ -23,7 +23,7 @@ export default function Home() {
                     width: isWide ? "31.8%" : "100%",
                     padding: space[6],
                     borderRadius: radius.xl,
-                    backgroundColor: theme.tertiaryBg,
+                    backgroundColor: "#1B1C1B",
                     borderColor: theme.borderColor,
                 },
             ]}
@@ -54,7 +54,7 @@ export default function Home() {
 
     return (
         <ScrollView
-            style={{ flex: 1, backgroundColor: theme.bodyBg }}
+            style={{ flex: 1, backgroundColor: "#151B24" }}
             contentContainerStyle={styles.page}
             showsVerticalScrollIndicator={false}
         >
@@ -128,7 +128,7 @@ export default function Home() {
                     {
                         paddingHorizontal: space[5],
                         paddingVertical: isWide ? space[9] : space[8],
-                        backgroundColor: theme.secondaryBg,
+                        backgroundColor: "#151B24",
                     },
                 ]}
             >
@@ -257,9 +257,10 @@ const styles = StyleSheet.create({
     heroImage: {
         width: "100%",
         height: "100%",
+        objectPosition: "center",
     },
     heroOverlay: {
-        backgroundColor: "rgba(5, 19, 29, 0.62)",
+        backgroundColor: "rgba(128, 128, 128, 0.24)",
     },
     heroContent: {
         width: "100%",
