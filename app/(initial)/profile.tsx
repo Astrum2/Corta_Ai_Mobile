@@ -14,7 +14,9 @@ export default function Profile() {
   const { form, role, isBarber, selectedPhoto, resolvedPhoto, loading, saving, loggingOut, status, changeField, setActive, pickPhoto, save, logout } = useProfile();
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.bodyBg }]}>
+      <SafeAreaView style={[styles.safeArea, {
+        backgroundColor: currentColor === "dark" ? "#141414" : theme.bodyBg,
+      }]}>
         <View style={styles.loading}>
           <ActivityIndicator size="large" color={theme.primary} />
           <Text style={{
@@ -31,7 +33,9 @@ export default function Profile() {
   }
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.bodyBg }]}>
+    <SafeAreaView style={[styles.safeArea, {
+      backgroundColor: currentColor === "dark" ? "#141414" : theme.bodyBg,
+    }]}>
       <ScrollView
         contentContainerStyle={[
           styles.page,
@@ -43,7 +47,9 @@ export default function Profile() {
         <View style={[
           styles.card,
           {
-            backgroundColor: theme.secondaryBg,
+            backgroundColor: currentColor === "dark"
+              ? "#141414"
+              : theme.secondaryBg,
             borderColor: theme.bodyColor,
             borderRadius: radius.lg,
             padding: space[5],
@@ -385,7 +391,7 @@ export default function Profile() {
             style={[
               styles.button,
               {
-                backgroundColor: theme.danger,
+                backgroundColor: "#980000",
                 borderRadius: radius.base,
               },
             ]}

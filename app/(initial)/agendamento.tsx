@@ -18,7 +18,7 @@ type SelectOption = {
 };
 
 export default function Agendamento() {
-    const { theme, radius, fontSize, font } = useTheme();
+    const { currentColor, theme, radius, fontSize, font } = useTheme();
     const params = useLocalSearchParams<{ user_id?: string | string[] }>();
     const router = useRouter();
 
@@ -219,7 +219,9 @@ export default function Agendamento() {
 
     return (
         <KeyboardAvoidingView
-            style={[styles.flex, { backgroundColor: theme.bodyBg }]}
+            style={[styles.flex, {
+                backgroundColor: currentColor === "dark" ? "#141414" : theme.bodyBg,
+            }]}
             behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
             <ScrollView
@@ -260,7 +262,9 @@ export default function Agendamento() {
                     style={[
                         styles.form,
                         {
-                            backgroundColor: theme.secondaryBg,
+                            backgroundColor: currentColor === "dark"
+                                ? "#141414"
+                                : theme.secondaryBg,
                             borderColor: theme.borderColor,
                             borderRadius: radius.lg,
                         },

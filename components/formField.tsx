@@ -34,7 +34,9 @@ export function FormField({ label, ...inputProps }: FormFieldProps) {
                     styles.input,
                     {
                         color: inputTextColor,
-                        backgroundColor: theme.tertiaryBg,
+                        backgroundColor: currentColor === "dark"
+                            ? "#1B1C1B"
+                            : theme.tertiaryBg,
                         borderColor: theme.borderColor,
                         borderRadius: radius.base,
                         fontFamily: font.base,
