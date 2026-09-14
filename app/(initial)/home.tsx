@@ -257,6 +257,7 @@ const styles = StyleSheet.create({
     heroImage: {
         width: "100%",
         height: "100%",
+        objectPosition: "center",
     },
     heroOverlay: {
         backgroundColor: "rgba(5, 19, 29, 0.62)",
