@@ -23,15 +23,15 @@ export default function Home() {
                     width: isWide ? "31.8%" : "100%",
                     padding: space[6],
                     borderRadius: radius.xl,
-                    backgroundColor: "#1B1C1B",
-                    borderColor: theme.borderColor,
+                    backgroundColor: "#232323",
+                    borderColor: "#232323",
                 },
             ]}
         >
             <Text
                 style={{
                     marginBottom: space[3],
-                    color: theme.bodyColor,
+                    color: "#FFFFFF",
                     fontFamily: font.baseBold,
                     fontSize: fontSize.h4,
                 }}
@@ -41,7 +41,7 @@ export default function Home() {
 
             <Text
                 style={{
-                    color: theme.secondaryColor,
+                    color: "#FFFFFF",
                     fontFamily: font.base,
                     fontSize: fontSize.base,
                     lineHeight: 21,
@@ -54,7 +54,7 @@ export default function Home() {
 
     return (
         <ScrollView
-            style={{ flex: 1, backgroundColor: "#151B24" }}
+            style={{ flex: 1, backgroundColor: theme.bodyBg }}
             contentContainerStyle={[styles.page, { width }]}
             showsVerticalScrollIndicator={false}
         >
@@ -129,7 +129,7 @@ export default function Home() {
                     {
                         paddingHorizontal: space[5],
                         paddingVertical: isWide ? space[9] : space[8],
-                        backgroundColor: "#151B24",
+                        backgroundColor: theme.bodyBg,
                     },
                 ]}
             >

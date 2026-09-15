@@ -8,7 +8,7 @@ import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, useW
 
 export default function Services() {
   const { width } = useWindowDimensions();
-  const { theme, font, fontSize, space, radius } = useTheme();
+  const { currentColor, theme, font, fontSize, space, radius } = useTheme();
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -193,7 +193,7 @@ export default function Services() {
       elevation: 3,
     },
     cardTitle: {
-      color: "#FFFFFF",
+      color: currentColor === "light" ? "#000000" : "#FFFFFF",
       fontFamily: font.baseBold,
       fontSize: fontSize.h3,
       marginBottom: space[3],
@@ -212,7 +212,7 @@ export default function Services() {
       marginBottom: space[2],
     },
     price: {
-      color: "#FFFFFF",
+      color: currentColor === "light" ? "#000000" : "#FFFFFF",
       fontFamily: font.baseBold,
       fontSize: fontSize.lg,
       marginTop: space[1],
