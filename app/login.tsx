@@ -1,6 +1,7 @@
 import { FormField } from "@/components/formField";
 import { useTheme } from "@/contexts/theme";
 import { loginUser } from "@/services/auth";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Platform, Pressable, StyleSheet, Text, View } from "react-native";
@@ -12,6 +13,7 @@ export default function Login() {
 
     const [email, setEmail] = useState("")
     const [senha, setSenha] = useState("")
+    const [mostrarSenha, setMostrarSenha] = useState(false)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
@@ -98,7 +100,20 @@ export default function Login() {
                         value={senha}
                         onChangeText={setSenha}
                         placeholder="Senha"
-                        secureTextEntry
+                        secureTextEntry={!mostrarSenha}
+                        rightElement={
+                            <Pressable
+                                accessibilityLabel={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                                onPress={() => setMostrarSenha((current) => !current)}
+                                style={styles.passwordToggle}
+                            >
+                                <FontAwesome
+                                    name={mostrarSenha ? "eye-slash" : "eye"}
+                                    size={18}
+                                    color={theme.secondaryColor}
+                                />
+                            </Pressable>
+                        }
                     />
 
                     <Pressable
@@ -205,6 +220,10 @@ const styles = StyleSheet.create({
     input: {
         width: "100%",
         borderWidth: 1,
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+    },
+    passwordToggle: {
         paddingHorizontal: 12,
         paddingVertical: 12,
     },

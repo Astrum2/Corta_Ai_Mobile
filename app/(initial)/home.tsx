@@ -55,7 +55,7 @@ export default function Home() {
     return (
         <ScrollView
             style={{ flex: 1, backgroundColor: "#151B24" }}
-            contentContainerStyle={styles.page}
+            contentContainerStyle={[styles.page, { width }]}
             showsVerticalScrollIndicator={false}
         >
             <ImageBackground
@@ -64,6 +64,7 @@ export default function Home() {
                 style={[
                     styles.hero,
                     {
+                        width,
                         minHeight: isWide ? 500 : 440,
                         paddingHorizontal: space[5],
                         paddingVertical: isWide ? space[9] : space[8],
@@ -216,7 +217,7 @@ export default function Home() {
                         style={styles.buttonImage}
                         imageStyle={{ borderRadius: radius.circle }}
                     >
-                        <Link href="/" asChild>
+                        <Link href="/(initial)/agendamento" asChild>
                             <Pressable
                                 style={({ pressed }) => [
                                     styles.button,
@@ -248,7 +249,6 @@ const styles = StyleSheet.create({
         flexGrow: 1,
     },
     hero: {
-        width: "100%",
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
@@ -257,7 +257,10 @@ const styles = StyleSheet.create({
     heroImage: {
         width: "100%",
         height: "100%",
-        objectPosition: "center",
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
     },
     heroOverlay: {
         backgroundColor: "rgba(128, 128, 128, 0.24)",

@@ -193,7 +193,7 @@ export default function Services() {
       elevation: 3,
     },
     cardTitle: {
-      color: theme.primary,
+      color: "#FFFFFF",
       fontFamily: font.baseBold,
       fontSize: fontSize.h3,
       marginBottom: space[3],
@@ -212,7 +212,7 @@ export default function Services() {
       marginBottom: space[2],
     },
     price: {
-      color: theme.primary,
+      color: "#FFFFFF",
       fontFamily: font.baseBold,
       fontSize: fontSize.lg,
       marginTop: space[1],
