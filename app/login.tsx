@@ -163,7 +163,7 @@ export default function Login() {
                                 style={[
                                     styles.registerLink,
                                     {
-                                        color: "#FFFFFF",
+                                        color: theme.primaryText,
                                         fontFamily: font.baseMedium,
                                         fontSize: fontSize.base,
                                     },

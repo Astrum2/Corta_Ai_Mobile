@@ -3,7 +3,8 @@ import { FlatList, StyleSheet, Text, View, useWindowDimensions } from "react-nat
 import Card, { type Barbeiro } from "@/components/cardBarber";
 import { useTheme } from "@/contexts/theme";
 import { getBarbers } from "@/services/barbers";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
 
 export default function Sobre() {
   const { width } = useWindowDimensions();
@@ -12,7 +13,8 @@ export default function Sobre() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
     let active = true;
 
     async function loadBarbeiros() {
@@ -30,11 +32,17 @@ export default function Sobre() {
       }
     }
 
-    loadBarbeiros();
+    void loadBarbeiros();
+    const refreshTimer = setInterval(() => {
+      void loadBarbeiros();
+    }, 30000);
+
     return () => {
       active = false;
+      clearInterval(refreshTimer);
     };
-  }, []);
+    }, []),
+  );
 
   const columns = width >= 680 ? 2 : 1;
 

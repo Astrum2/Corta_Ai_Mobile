@@ -14,7 +14,7 @@ type ApiError = {
     error?: string;
 };
 
-function photoUrl(photo: unknown) {
+function photoUrl(photo: unknown, cacheKey: number) {
     if (typeof photo !== "string" || !photo) {
         return "";
     }
@@ -27,10 +27,12 @@ function photoUrl(photo: unknown) {
         return photo;
     }
 
-    return `${API_URL.replace(/\/$/, "")}/${photo.replace(/^\/+/, "")}`;
+    const url = `${API_URL.replace(/\/$/, "")}/${photo.replace(/^\/+/, "")}`;
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}v=${cacheKey}`;
 }
 
-function normalizeBarber(value: unknown): Barber | null {
+function normalizeBarber(value: unknown, cacheKey: number): Barber | null {
     if (!value || typeof value !== "object") {
         return null;
     }
@@ -50,7 +52,7 @@ function normalizeBarber(value: unknown): Barber | null {
     return {
         id: Number(id),
         name,
-        photo: photoUrl(barber.photo ?? user?.photo),
+        photo: photoUrl(barber.photo ?? user?.photo, cacheKey),
         active: barber.active === true,
     };
 }
@@ -60,6 +62,7 @@ export async function getBarbers(): Promise<Barber[]> {
         throw new Error("EXPO_PUBLIC_URL não está configurada.");
     }
 
+    const cacheKey = Date.now();
     const response = await fetch(
         `${API_URL.replace(/\/$/, "")}${BARBERS_ENDPOINT}`,
     );
@@ -84,6 +87,13 @@ export async function getBarbers(): Promise<Barber[]> {
                 : [];
 
     return items
-        .map(normalizeBarber)
+        .map((value) => normalizeBarber(value, cacheKey))
+        .map((barber) => {
+            if (!barber) return null;
+            return {
+                ...barber,
+                photo: barber.photo,
+            };
+        })
         .filter((barber): barber is Barber => barber !== null && barber.active === true);
 }
