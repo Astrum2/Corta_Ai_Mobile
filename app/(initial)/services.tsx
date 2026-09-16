@@ -375,7 +375,7 @@ export default function Services() {
                             </Text>
 
                             <Text style={styles.price}>
-                              Preço: {formatCurrency(item.price)}
+                              Preço: R$ {formatCurrency(item.price)}
                             </Text>
                           </>
                         )}
