@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   },
   photo: {
     width: "100%",
-    height: 180,
+    height: 220,
   },
   photoFallback: {
     alignItems: "center",

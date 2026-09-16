@@ -55,22 +55,13 @@ export default function Home() {
     return (
         <ScrollView
             style={{ flex: 1, backgroundColor: theme.bodyBg }}
-            contentContainerStyle={[styles.page, { width }]}
+            contentContainerStyle={styles.page}
             showsVerticalScrollIndicator={false}
         >
             <ImageBackground
                 source={require("../../imagens/banner.jpg")}
                 resizeMode="cover"
-                style={[
-                    styles.hero,
-                    {
-                        width,
-                        minHeight: isWide ? 500 : 440,
-                        paddingHorizontal: space[5],
-                        paddingVertical: isWide ? space[9] : space[8],
-                    },
-                ]}
-                imageStyle={styles.heroImage}
+                style={styles.hero}
             >
                 <View style={styles.heroOverlay} />
 
@@ -247,22 +238,25 @@ export default function Home() {
 const styles = StyleSheet.create({
     page: {
         flexGrow: 1,
+        width: "100%",
     },
+
     hero: {
+        width: "100%",
+        minHeight: 440,
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
         overflow: "hidden",
     },
+
+
     heroImage: {
-        width: "100%",
-        height: "100%",
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
+        ...StyleSheet.absoluteFill,
     },
+
     heroOverlay: {
+        ...StyleSheet.absoluteFill,
         backgroundColor: "rgba(128, 128, 128, 0.24)",
     },
     heroContent: {

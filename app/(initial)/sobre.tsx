@@ -22,9 +22,7 @@ export default function Sobre() {
       } catch (requestError) {
         if (active) {
           setError(
-            requestError instanceof Error
-              ? requestError.message
-              : "Não foi possível carregar os barbeiros.",
+            requestError instanceof Error ? requestError.message : "Não foi possível carregar os barbeiros.",
           );
         }
       } finally {
