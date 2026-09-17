@@ -29,7 +29,7 @@ export default function Layout() {
             <Tabs.Screen
                 name="profile"
                 options={{
-                    title: "Profile",
+                    title: "Perfil",
                     tabBarIcon: ({ color }) => <FontAwesome size={18} name="user" color={color} />
                 }}
             />

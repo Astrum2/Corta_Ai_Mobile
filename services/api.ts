@@ -31,7 +31,46 @@ export type RegisterUserResponse = User & {
 type ApiError = {
     message?: string;
     error?: string;
+    errors?: Record<string, string | string[]>;
 };
+
+function firstValidationMessage(errors: Record<string, string | string[]> | undefined) {
+    if (!errors) return "";
+
+    const firstError = Object.values(errors)[0];
+    return Array.isArray(firstError) ? firstError[0] ?? "" : firstError;
+}
+
+export function userFacingApiMessage(payload: unknown, fallbackMessage: string): string {
+    const error = typeof payload === "object" && payload !== null
+        ? payload as ApiError
+        : undefined;
+    const rawMessage = error?.message || error?.error || firstValidationMessage(error?.errors)
+        || (typeof payload === "string" && payload.trim() ? payload.trim() : fallbackMessage);
+    const normalizedMessage = rawMessage.toLowerCase();
+
+    if (normalizedMessage.includes("these credentials do not match")
+        || normalizedMessage.includes("invalid credentials")) {
+        return "E-mail ou senha inválidos. Confira seus dados e tente novamente.";
+    }
+
+    if (normalizedMessage.includes("email has already been taken")
+        || normalizedMessage.includes("e-mail já está cadastrado")) {
+        return "Este e-mail já está cadastrado. Tente entrar ou use outro e-mail.";
+    }
+
+    if (normalizedMessage.includes("unauthenticated")
+        || normalizedMessage.includes("unauthorized")) {
+        return "Sua sessão expirou. Entre novamente para continuar.";
+    }
+
+    if (normalizedMessage.includes("network request failed")
+        || normalizedMessage.includes("failed to fetch")) {
+        return "Não conseguimos conectar ao servidor. Verifique sua internet e tente novamente.";
+    }
+
+    return rawMessage;
+}
 
 export function requireApiUrl(): string {
     if (!API_URL) {
@@ -59,16 +98,7 @@ export async function parseResponse<T>(
     }
 
     if (!response.ok) {
-        const error =
-            typeof data === "object" && data !== null
-                ? (data as ApiError)
-                : undefined;
-
-        throw new Error(
-            error?.message ||
-                error?.error ||
-                (typeof data === "string" && data.trim() ? data : fallbackMessage)
-        );
+        throw new Error(userFacingApiMessage(data, fallbackMessage));
     }
 
     return data as T;
@@ -125,13 +155,7 @@ export async function registerUser(userData: CreateUserData): Promise<RegisterUs
     const data = await response.json();
 
     if (!response.ok) {
-        const error = data as ApiError;
-
-        throw new Error(
-            error.message ||
-            error.error ||
-            "Não foi possível realizar o cadastro."
-        );
+        throw new Error(userFacingApiMessage(data, "Não foi possível realizar o cadastro."));
     }
 
     return data as User;

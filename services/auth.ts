@@ -1,5 +1,5 @@
 import * as SecureStore from "expo-secure-store";
-import API_URL from "./api";
+import API_URL, { userFacingApiMessage } from "./api";
 
 const TOKEN_KEY = "auth_token";
 const USER_KEY = "auth_user";
@@ -20,11 +20,6 @@ export type LoginResponse = {
     user: AuthUser;
 };
 
-type ApiError = {
-    message?: string;
-    error?: string;
-};
-
 export async function loginUser(email: string, password: string): Promise<LoginResponse> {
     const response = await fetch(`${API_URL}/login`, {
         method: "POST",
@@ -37,16 +32,10 @@ export async function loginUser(email: string, password: string): Promise<LoginR
         }),
     });
 
-    const data = await response.json() as LoginResponse | ApiError;
+    const data = await response.json() as unknown;
 
     if (!response.ok) {
-        const error = data as ApiError;
-
-        throw new Error(
-            error.message ||
-            error.error ||
-            "Email ou senha inválidos."
-        );
+        throw new Error(userFacingApiMessage(data, "Não foi possível realizar o login."));
     }
 
     const loginResponse = data as LoginResponse;

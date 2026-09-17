@@ -1,6 +1,7 @@
 import { FormField } from "@/components/formField";
 import { useTheme } from "@/contexts/theme";
 import { registerUser } from "@/services/api";
+import { loginUser } from "@/services/auth";
 import { formatCPF, onlyDigits } from "@/services/formatters";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -89,6 +90,8 @@ export default function Cadastro() {
                 password: senha,
             });
 
+            await loginUser(email, senha);
+
             setNome("");
             setEmail("");
             setCpf("");
@@ -99,7 +102,7 @@ export default function Cadastro() {
             Alert.alert(
                 "Sucesso",
                 response.message || "Usuário criado!",
-                [{ text: "OK", onPress: () => router.replace("/login") }]
+                [{ text: "OK", onPress: () => router.replace("/(initial)/home") }]
             );
         } catch (error) {
             const message = error instanceof Error
