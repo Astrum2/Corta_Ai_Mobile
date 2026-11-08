@@ -1,16 +1,20 @@
 import { Button } from "@/components/button";
 import { FormField } from "@/components/formField";
+import Notifications from "@/components/notifications";
 import { SelectField } from "@/components/selectField";
 import { H1 } from "@/components/text";
 import { useTheme } from "@/contexts/theme";
 import { createAppointment, TIME_SLOTS } from "@/services/appointments";
 import { fetchAuthenticatedUser, getAuthToken, getAuthUser } from "@/services/auth";
 import { getBarbers, type Barber } from "@/services/barbers";
-import { formatDateInput, parseDateInput } from "@/services/formatters";
+import { formatDateInput, formatDateValue, parseDateInput, parseDateInputToDate } from "@/services/formatters";
+import { getNotificationForAppointment, type Notification as BackendNotification } from "@/services/notifications";
 import { getServices, Service } from "@/services/serviceList";
+import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 type SelectOption = {
     label: string;
@@ -60,6 +64,7 @@ export default function Agendamento() {
     const [serviceId, setServiceId] = useState("");
     const [barberId, setBarberId] = useState("");
     const [selectedDate, setSelectedDate] = useState("");
+    const [datePickerVisible, setDatePickerVisible] = useState(false);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
     const [notes, setNotes] = useState("");
 
@@ -68,6 +73,7 @@ export default function Agendamento() {
     const [erroServicos, setErroServicos] = useState("");
     const [erroBarbeiros, setErroBarbeiros] = useState("");
     const [enviando, setEnviando] = useState(false);
+    const [notification, setNotification] = useState<BackendNotification | null>(null);
 
     useEffect(() => {
         let mounted = true;
@@ -145,6 +151,14 @@ export default function Agendamento() {
         setNotes("");
     };
 
+    const handleDateChange = (_event: DateTimePickerEvent, date?: Date) => {
+        setDatePickerVisible(Platform.OS === "ios");
+
+        if (date) {
+            setSelectedDate(formatDateValue(date));
+        }
+    };
+
     const enviarAgendamento = async () => {
         if (!usuarioAutenticado) {
             Alert.alert("Login necessário", "Faça login para criar um agendamento.");
@@ -196,7 +210,7 @@ export default function Agendamento() {
         try {
             setEnviando(true);
 
-            await createAppointment({
+            const appointment = await createAppointment({
                 user_id: appointmentUserId,
                 service_id: parsedServiceId,
                 barber_id: parsedBarberId,
@@ -206,7 +220,7 @@ export default function Agendamento() {
             });
 
             limparFormulario();
-            Alert.alert("Sucesso", "Agendamento criado com sucesso!");
+            setNotification(await getNotificationForAppointment(appointmentUserId, appointment.id));
         } catch (error) {
             Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível criar o agendamento." );
         } finally {
@@ -342,7 +356,32 @@ export default function Agendamento() {
                         keyboardType="number-pad"
                         autoCapitalize="none"
                         maxLength={10}
+                        rightElement={
+                            Platform.OS !== "web" ? (
+                                <Pressable
+                                    accessibilityLabel="Selecionar data"
+                                    accessibilityRole="button"
+                                    disabled={campoDesabilitado}
+                                    onPress={() => setDatePickerVisible(true)}
+                                    style={styles.calendarButton}
+                                >
+                                    <Ionicons
+                                        name="calendar-outline"
+                                        size={22}
+                                        color={theme.primary}
+                                    />
+                                </Pressable>
+                            ) : undefined
+                        }
                     />
+                    {datePickerVisible && Platform.OS !== "web" && (
+                        <DateTimePicker
+                            value={parseDateInputToDate(selectedDate) ?? new Date()}
+                            mode="date"
+                            display={Platform.OS === "android" ? "calendar" : "default"}
+                            onChange={handleDateChange}
+                        />
+                    )}
 
                     <SelectField
                         label="Horários disponíveis (15 em 15 minutos)"
@@ -371,6 +410,23 @@ export default function Agendamento() {
                     </Button>
                 </View>
             </ScrollView>
+            <Modal
+                visible={notification !== null}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setNotification(null)}
+            >
+                <View style={[styles.notificationBackdrop, { backgroundColor: theme.backdrop }]}>
+                    {notification && (
+                        <Notifications
+                            title={notification.title}
+                            message={notification.message}
+                            type={notification.type}
+                            onClose={() => setNotification(null)}
+                        />
+                    )}
+                </View>
+            </Modal>
         </KeyboardAvoidingView>
     );
 }
@@ -411,5 +467,11 @@ const styles = StyleSheet.create({
     },
     errorText: {
         marginTop: -6,
+    },
+    notificationBackdrop: {
+        flex: 1,
+    },
+    calendarButton: {
+        padding: 10,
     },
 });

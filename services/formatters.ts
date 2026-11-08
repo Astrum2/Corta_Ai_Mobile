@@ -43,6 +43,20 @@ export const parseDateInput = (value: string): string | null => {
     return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 };
 
+export const formatDateValue = (date: Date): string =>
+    `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
+
+export const parseDateInputToDate = (value: string): Date | null => {
+    const apiDate = parseDateInput(value);
+
+    if (!apiDate) {
+        return null;
+    }
+
+    const [year, month, day] = apiDate.split("-").map(Number);
+    return new Date(year, month - 1, day);
+};
+
 export const formatCurrency = (value: number): string =>
     value.toLocaleString("pt-BR", {
         style: "currency",

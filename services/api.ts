@@ -1,7 +1,7 @@
 import { onlyDigits } from "./formatters";
 
 const API_URL = process.env.EXPO_PUBLIC_URL
-
+const API_MICROSERVICES = process.env.EXPO_PUBLIC_MICROSERVICES_URL
 
 export type CreateUserData = {
     name: string;
@@ -78,6 +78,14 @@ export function requireApiUrl(): string {
     }
 
     return API_URL;
+}
+
+export function requireMicroservicesUrl(): string {
+    if (!API_MICROSERVICES) {
+        throw new Error("EXPO_MICROSERVICES_PUBLIC_URL não está configurada.");
+    }
+
+    return API_MICROSERVICES;
 }
 
 export async function parseResponse<T>(

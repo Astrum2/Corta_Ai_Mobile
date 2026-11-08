@@ -1,12 +1,17 @@
 import { FormField } from "@/components/formField";
+import Notifications from "@/components/notifications";
 import { SelectField } from "@/components/selectField";
 import { useTheme } from "@/contexts/theme";
 import { TIME_SLOTS, type Appointment } from "@/services/appointments";
 import { deleteUserAppointment, getUserAppointments, updateUserAppointment } from "@/services/appointmentsUser";
-import { formatDateInput, parseDateInput } from "@/services/formatters";
+import { getAuthUser } from "@/services/auth";
+import { formatDateInput, formatDateValue, parseDateInput, parseDateInputToDate } from "@/services/formatters";
+import { getNotificationForAppointment, type Notification as BackendNotification } from "@/services/notifications";
+import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Stack, useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Modal, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 function formatDate(value: string) {
@@ -33,10 +38,22 @@ export default function MeusAgendamentos() {
     const [error, setError] = useState("");
     const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
     const [editDate, setEditDate] = useState("");
+    const [editDatePickerVisible, setEditDatePickerVisible] = useState(false);
     const [editTime, setEditTime] = useState("");
     const [editNotes, setEditNotes] = useState("");
     const [savingId, setSavingId] = useState<number | null>(null);
     const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [notification, setNotification] = useState<BackendNotification | null>(null);
+
+    const showBackendNotification = async (appointmentId: number) => {
+        const user = await getAuthUser();
+
+        if (!user) {
+            return;
+        }
+
+        setNotification(await getNotificationForAppointment(user.id, appointmentId));
+    };
 
     const loadAppointments = useCallback(async () => {
         try {
@@ -55,13 +72,23 @@ export default function MeusAgendamentos() {
     const openEdit = (appointment: Appointment) => {
         setEditingAppointment(appointment);
         setEditDate(formatDate(appointment.date).replace(/-/g, "/"));
+        setEditDatePickerVisible(false);
         setEditTime(appointment.time);
         setEditNotes(appointment.notes ?? "");
     };
 
     const closeEdit = () => {
         if (savingId === null) {
+            setEditDatePickerVisible(false);
             setEditingAppointment(null);
+        }
+    };
+
+    const handleEditDateChange = (_event: DateTimePickerEvent, date?: Date) => {
+        setEditDatePickerVisible(Platform.OS === "ios");
+
+        if (date) {
+            setEditDate(formatDateValue(date));
         }
     };
 
@@ -93,11 +120,10 @@ export default function MeusAgendamentos() {
                 notes: editNotes.trim() || null,
             });
             setEditingAppointment(null);
+            await showBackendNotification(editingAppointment.id);
             await loadAppointments();
         } catch (reason) {
-            Alert.alert(
-                "Erro",
-                reason instanceof Error ? reason.message : "Não foi possível atualizar o agendamento."
+            Alert.alert( "Erro", reason instanceof Error ? reason.message : "Não foi possível atualizar o agendamento."
             );
         } finally {
             setSavingId(null);
@@ -117,6 +143,7 @@ export default function MeusAgendamentos() {
                         try {
                             setDeletingId(appointment.id);
                             await deleteUserAppointment(appointment.id);
+                            await showBackendNotification(appointment.id);
                             await loadAppointments();
                         } catch (reason) {
                             Alert.alert(
@@ -267,7 +294,32 @@ export default function MeusAgendamentos() {
                             placeholder="DD/MM/AAAA"
                             keyboardType="number-pad"
                             maxLength={10}
+                            rightElement={
+                                Platform.OS !== "web" ? (
+                                    <Pressable
+                                        accessibilityLabel="Selecionar data"
+                                        accessibilityRole="button"
+                                        disabled={savingId !== null}
+                                        onPress={() => setEditDatePickerVisible(true)}
+                                        style={styles.calendarButton}
+                                    >
+                                        <Ionicons
+                                            name="calendar-outline"
+                                            size={22}
+                                            color={theme.primary}
+                                        />
+                                    </Pressable>
+                                ) : undefined
+                            }
                         />
+                        {editDatePickerVisible && Platform.OS !== "web" && (
+                            <DateTimePicker
+                                value={parseDateInputToDate(editDate) ?? new Date()}
+                                mode="date"
+                                display={Platform.OS === "android" ? "calendar" : "default"}
+                                onChange={handleEditDateChange}
+                            />
+                        )}
                         <SelectField
                             label="Horário"
                             value={editTime}
@@ -297,6 +349,23 @@ export default function MeusAgendamentos() {
                             </Pressable>
                         </View>
                     </View>
+                </View>
+            </Modal>
+            <Modal
+                visible={notification !== null}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setNotification(null)}
+            >
+                <View style={[styles.modalBackdrop, { backgroundColor: theme.backdrop }]}>
+                    {notification && (
+                        <Notifications
+                            title={notification.title}
+                            message={notification.message}
+                            type={notification.type}
+                            onClose={() => setNotification(null)}
+                        />
+                    )}
                 </View>
             </Modal>
         </SafeAreaView>
@@ -350,5 +419,8 @@ const styles = StyleSheet.create({
     notesInput: {
         minHeight: 80,
         textAlignVertical: "top",
+    },
+    calendarButton: {
+        padding: 10,
     },
 });
