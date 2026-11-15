@@ -1,10 +1,21 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome"
-import { Tabs } from "expo-router"
+import { Link, Tabs } from "expo-router"
 import React from "react"
+import { Pressable } from "react-native"
 
 export default function Layout() {
     return (
-        <Tabs>
+        <Tabs
+            screenOptions={{
+                headerRight: () => (
+                    <Link href="/(initial)/profile" asChild>
+                        <Pressable accessibilityLabel="Abrir perfil" hitSlop={8}  style={{ marginRight: 20, width: 36, height: 36, borderRadius: 18, borderWidth: 1.5, borderColor: '#000000', justifyContent: 'center', alignItems: 'center', }}>
+                            <FontAwesome size={20} name="user" color="#000000" />
+                        </Pressable>
+                    </Link>
+                ),
+            }}
+        >
             <Tabs.Screen
                 name="home"
                 options={{
@@ -27,10 +38,17 @@ export default function Layout() {
                 }}
             />
             <Tabs.Screen
+                name="reviews"
+                options={{
+                    title: "Reviews",
+                    tabBarIcon: ({ color }) => <FontAwesome size={18} name="star" color={color} />
+                }}
+            />
+            <Tabs.Screen
                 name="profile"
                 options={{
                     title: "Perfil",
-                    tabBarIcon: ({ color }) => <FontAwesome size={18} name="user" color={color} />
+                    href: null
                 }}
             />
             <Tabs.Screen
