@@ -1,8 +1,10 @@
 import { Button } from "@/components/button";
 import ReviewCard from "@/components/CardReviews";
 import { FormField } from "@/components/formField";
+import Notifications from "@/components/notifications";
 import { H1 } from "@/components/text";
 import { useTheme } from "@/contexts/theme";
+import { getNotificationForReview, type Notification as BackendNotification } from "@/services/notifications";
 import { deleteReview, getNextVisibleCount, getVisibleReviews, hasMoreReviews, loadReviews, normalizeRating, type Review, REVIEWS_PER_PAGE, saveReview } from "@/services/reviews";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import React, { useEffect, useState } from "react";
@@ -23,6 +25,7 @@ export default function Reviews() {
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);
     const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
     const [deletingReviewId, setDeletingReviewId] = useState<number | null>(null);
+    const [notification, setNotification] = useState<BackendNotification | null>(null);
 
     useEffect(() => {
         let isMounted = true;
@@ -86,6 +89,7 @@ export default function Reviews() {
                 )));
             setSubmitting(false);
             closeReviewForm();
+            setNotification(await getNotificationForReview(currentUserId));
         } catch (submitError: unknown) {
             setFormError( submitError instanceof Error  ? submitError.message : "Não foi possível enviar a avaliação." );
         } finally {
@@ -117,6 +121,9 @@ export default function Reviews() {
             setDeletingReviewId(reviewId);
             await deleteReview(reviewId);
             setReviews((currentReviews) => currentReviews.filter((review) => review.id !== reviewId));
+            if (currentUserId !== null) {
+                setNotification(await getNotificationForReview(currentUserId));
+            }
         } catch (deleteError: unknown) {
             Alert.alert( "Não foi possível excluir", deleteError instanceof Error ? deleteError.message : "Não foi possível remover a avaliação." );
         } finally {
@@ -382,6 +389,24 @@ export default function Reviews() {
                     </KeyboardAvoidingView>
                 </SafeAreaView>
             </Modal>
+
+            <Modal
+                animationType="fade"
+                onRequestClose={() => setNotification(null)}
+                transparent
+                visible={notification !== null}
+            >
+                <View style={[styles.notificationBackdrop, { backgroundColor: theme.backdrop }]}>
+                    {notification && (
+                        <Notifications
+                            title={notification.title}
+                            message={notification.message}
+                            type={notification.type}
+                            onClose={() => setNotification(null)}
+                        />
+                    )}
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -434,5 +459,8 @@ const styles = StyleSheet.create({
         gap: 14,
         justifyContent: "center",
         marginVertical: 28
+    },
+    notificationBackdrop: {
+        flex: 1,
     },
 });

@@ -220,7 +220,7 @@ export default function Agendamento() {
             });
 
             limparFormulario();
-            setNotification(await getNotificationForAppointment(appointmentUserId, appointment.id));
+            setNotification(await getNotificationForAppointment(appointmentUserId));
         } catch (error) {
             Alert.alert("Erro", error instanceof Error ? error.message : "Não foi possível criar o agendamento." );
         } finally {

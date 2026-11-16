@@ -52,7 +52,7 @@ export default function MeusAgendamentos() {
             return;
         }
 
-        setNotification(await getNotificationForAppointment(user.id, appointmentId));
+        setNotification(await getNotificationForAppointment(user.id));
     };
 
     const loadAppointments = useCallback(async () => {

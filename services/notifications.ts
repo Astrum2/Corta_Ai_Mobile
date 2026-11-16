@@ -1,11 +1,12 @@
-import { normalizeArray, parseResponse, requireMicroservicesUrl } from "./api";
+import { parseResponse, requireMicroservicesUrl } from "./api";
 
 export type NotificationStatus = "pending" | "sent" | "failed" | string;
 
 export type Notification = {
     id: number;
     user_id: number;
-    appointment_id: number;
+    appointment_id?: number | null;
+    review_id?: number | null;
     type: string;
     title: string;
     message: string;
@@ -16,7 +17,31 @@ export type Notification = {
 
 const NOTIFICATION_FETCH_DELAY_MS = 200;
 
-export async function getNotifications(userId: number): Promise<Notification[]> {
+function normalizeNotification(payload: unknown): Notification | null {
+    if (typeof payload !== "object" || payload === null) {
+        return null;
+    }
+
+    const root = payload as Record<string, unknown>;
+
+    if (typeof root.id === "number") {
+        return root as Notification;
+    }
+
+    for (const key of ["notification", "notificação", "latest"]) {
+        if (typeof root[key] === "object" && root[key] !== null) {
+            return root[key] as Notification;
+        }
+    }
+
+    if (typeof root.data === "object" && root.data !== null) {
+        return root.data as Notification;
+    }
+
+    return null;
+}
+
+export async function getLatestNotification(userId: number): Promise<Notification | null> {
     if (!Number.isInteger(userId) || userId <= 0) {
         throw new Error("O ID do usuário deve ser um número inteiro positivo.");
     }
@@ -36,16 +61,17 @@ export async function getNotifications(userId: number): Promise<Notification[]> 
         "Não foi possível carregar suas notificações.",
     );
 
-    return normalizeArray<Notification>(payload, ["notifications", "notificações"]);
+    return normalizeNotification(payload);
 }
 
-export async function getNotificationForAppointment(
-    userId: number,
-    appointmentId: number,
-): Promise<Notification | null> {
+export async function getNotificationForAppointment(userId: number): Promise<Notification | null> {
     await new Promise((resolve) => setTimeout(resolve, NOTIFICATION_FETCH_DELAY_MS));
 
-    const notifications = await getNotifications(userId);
+    return getLatestNotification(userId);
+}
 
-    return notifications.find((notification) => notification.appointment_id === appointmentId) ?? null;
+export async function getNotificationForReview(userId: number): Promise<Notification | null> {
+    await new Promise((resolve) => setTimeout(resolve, NOTIFICATION_FETCH_DELAY_MS));
+
+    return getLatestNotification(userId);
 }
