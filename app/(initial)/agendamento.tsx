@@ -4,14 +4,14 @@ import Notifications from "@/components/notifications";
 import { SelectField } from "@/components/selectField";
 import { H1 } from "@/components/text";
 import { useTheme } from "@/contexts/theme";
-import { createAppointment, TIME_SLOTS } from "@/services/appointments";
+import { createAppointmentFromForm, getAvailableTimeSlots } from "@/services/appointments";
 import { fetchAuthenticatedUser, getAuthToken, getAuthUser } from "@/services/auth";
 import { getBarbers, type Barber } from "@/services/barbers";
 import { formatDateInput, formatDateValue, parseDateInput, parseDateInputToDate } from "@/services/formatters";
 import { getNotificationForAppointment, type Notification as BackendNotification } from "@/services/notifications";
 import { getServices, Service } from "@/services/serviceList";
-import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -25,7 +25,6 @@ export default function Agendamento() {
     const { currentColor, theme, radius, fontSize, font } = useTheme();
     const params = useLocalSearchParams<{ user_id?: string | string[] }>();
     const router = useRouter();
-
     const rawUserId = Array.isArray(params.user_id) ? params.user_id[0] : params.user_id;
     const userId = Number(rawUserId);
     const [usuarioAutenticado, setUsuarioAutenticado] = useState(false);
@@ -38,14 +37,9 @@ export default function Agendamento() {
         async function verificarAutenticacao() {
             const token = await getAuthToken();
 
-            if (!mounted) {
-                return;
-            }
+            if (!mounted) { return }
 
-            if (!token) {
-                router.replace("/login");
-                return;
-            }
+            if (!token) { router.replace("/login"); return }
 
             const authUser = (await getAuthUser()) ?? (await fetchAuthenticatedUser());
             setUsuarioIdAutenticado(authUser?.id ?? (userIdValido ? userId : null));
@@ -67,7 +61,9 @@ export default function Agendamento() {
     const [datePickerVisible, setDatePickerVisible] = useState(false);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
     const [notes, setNotes] = useState("");
-
+    const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
+    const [carregandoHorarios, setCarregandoHorarios] = useState(false);
+    const [erroHorarios, setErroHorarios] = useState("");
     const [carregandoServicos, setCarregandoServicos] = useState(true);
     const [carregandoBarbeiros, setCarregandoBarbeiros] = useState(true);
     const [erroServicos, setErroServicos] = useState("");
@@ -89,24 +85,18 @@ export default function Agendamento() {
                 getBarbers(),
             ]);
 
-            if (!mounted) {
-                return;
-            }
+            if (!mounted) { return }
 
             if (servicesResult.status === "fulfilled") {
                 setServicos(servicesResult.value);
             } else {
-                setErroServicos(
-                    servicesResult.reason instanceof Error ? servicesResult.reason.message : "Não foi possível carregar os serviços."
-                );
+                setErroServicos( servicesResult.reason instanceof Error ? servicesResult.reason.message : "Não foi possível carregar os serviços." );
             }
 
             if (barbersResult.status === "fulfilled") {
                 setBarbeiros(barbersResult.value);
             } else {
-                setErroBarbeiros(
-                    barbersResult.reason instanceof Error ? barbersResult.reason.message : "Não foi possível carregar os barbeiros."
-                );
+                setErroBarbeiros( barbersResult.reason instanceof Error ? barbersResult.reason.message : "Não foi possível carregar os barbeiros." );
             }
 
             setCarregandoServicos(false);
@@ -119,6 +109,56 @@ export default function Agendamento() {
             mounted = false;
         };
     }, []);
+
+    useEffect(() => {
+        let mounted = true;
+
+        const apiDate = parseDateInput(selectedDate.trim());
+        const parsedBarberId = Number(barberId);
+        const parsedServiceId = Number(serviceId);
+        const barberIdValido = Number.isInteger(parsedBarberId) && parsedBarberId > 0;
+        const selectedService = servicos.find((servico) => servico.id === parsedServiceId);
+
+        if (!apiDate || !barberIdValido || !selectedService) {
+            setAvailableTimeSlots([]);
+            setSelectedTimeSlot("");
+            setCarregandoHorarios(false);
+            return () => { mounted = false; };
+        }
+
+        const availabilityDate = apiDate;
+        const serviceDuration = selectedService.duration_minutes;
+        setSelectedTimeSlot("");
+        setCarregandoHorarios(true);
+
+        async function carregarHorariosOcupados() {
+            setCarregandoHorarios(true);
+            setErroHorarios("");
+
+            try {
+                const lista = await getAvailableTimeSlots(
+                    parsedBarberId,
+                    availabilityDate,
+                    serviceDuration
+                );
+
+                if (!mounted) { return }
+
+                setAvailableTimeSlots(lista);
+            } catch (error) {
+                if (mounted) {
+                    setAvailableTimeSlots([]);
+                    setErroHorarios( error instanceof Error ? error.message : "Não foi possível verificar os horários disponíveis." );
+                }
+            } finally {
+                if (mounted) { setCarregandoHorarios(false) }
+            }
+        }
+
+        carregarHorariosOcupados();
+
+        return () => { mounted = false };
+    }, [barberId, selectedDate, serviceId, servicos]);
 
     const serviceOptions = useMemo<SelectOption[]>(
         () =>
@@ -138,10 +178,19 @@ export default function Agendamento() {
         [barbeiros]
     );
 
-    const timeOptions = useMemo<SelectOption[]>(
-        () => TIME_SLOTS.map((time) => ({ label: time, value: time })),
-        []
-    );
+    const timeOptions = useMemo<SelectOption[]>(() => {
+        const apiDate = parseDateInput(selectedDate.trim());
+        const parsedBarberId = Number(barberId);
+
+        if (!apiDate || !Number.isInteger(parsedBarberId) || parsedBarberId <= 0) {
+            return [];
+        }
+
+        return availableTimeSlots.map((time) => ({
+                label: time,
+                value: time,
+            }));
+    }, [availableTimeSlots, barberId, selectedDate]);
 
     const limparFormulario = () => {
         setServiceId("");
@@ -149,6 +198,8 @@ export default function Agendamento() {
         setSelectedDate("");
         setSelectedTimeSlot("");
         setNotes("");
+        setAvailableTimeSlots([]);
+        setCarregandoHorarios(false);
     };
 
     const handleDateChange = (_event: DateTimePickerEvent, date?: Date) => {
@@ -156,6 +207,9 @@ export default function Agendamento() {
 
         if (date) {
             setSelectedDate(formatDateValue(date));
+            setSelectedTimeSlot("");
+            setAvailableTimeSlots([]);
+            setCarregandoHorarios(false);
         }
     };
 
@@ -167,56 +221,21 @@ export default function Agendamento() {
 
         const appointmentUserId = usuarioIdAutenticado ?? (userIdValido ? userId : null);
 
-        if (!appointmentUserId) {
-            Alert.alert("Erro", "Usuário inválido para criar o agendamento.");
-            return;
-        }
-
-        if (!serviceId) {
-            Alert.alert("Erro", "Selecione um serviço.");
-            return;
-        }
-
-        if (!barberId) {
-            Alert.alert("Erro", "Selecione um barbeiro.");
-            return;
-        }
-
-        if (!selectedDate.trim()) {
-            Alert.alert("Erro", "Informe a data do agendamento.");
-            return;
-        }
-
-        const apiDate = parseDateInput(selectedDate.trim());
-
-        if (!apiDate) {
-            Alert.alert("Erro", "Informe uma data válida no formato DD/MM/AAAA.");
-            return;
-        }
-
-        if (!selectedTimeSlot) {
-            Alert.alert("Erro", "Selecione um horário.");
-            return;
-        }
-
-        const parsedServiceId = Number(serviceId);
-        const parsedBarberId = Number(barberId);
-
-        if ( !Number.isInteger(parsedServiceId) || parsedServiceId <= 0 || !Number.isInteger(parsedBarberId) || parsedBarberId <= 0 ) {
-            Alert.alert("Erro", "Serviço ou barbeiro inválido.");
+        if (appointmentUserId === null) {
+            Alert.alert("Erro", "Não foi possível identificar o usuário autenticado.");
             return;
         }
 
         try {
             setEnviando(true);
 
-            const appointment = await createAppointment({
-                user_id: appointmentUserId,
-                service_id: parsedServiceId,
-                barber_id: parsedBarberId,
-                date: apiDate,
+            await createAppointmentFromForm({
+                userId: appointmentUserId,
+                serviceId,
+                barberId,
+                date: selectedDate,
                 time: selectedTimeSlot,
-                notes: notes.trim() || null,
+                notes
             });
 
             limparFormulario();
@@ -276,9 +295,7 @@ export default function Agendamento() {
                     style={[
                         styles.form,
                         {
-                            backgroundColor: currentColor === "dark"
-                                ? "#141414"
-                                : theme.secondaryBg,
+                            backgroundColor: currentColor === "dark" ? "#141414" : theme.secondaryBg,
                             borderColor: theme.borderColor,
                             borderRadius: radius.lg,
                         },
@@ -328,7 +345,7 @@ export default function Agendamento() {
                         placeholder={ carregandoBarbeiros  ? "Carregando barbeiros..." : "Selecione" }
                         value={barberId}
                         options={barberOptions}
-                        onChange={setBarberId}
+                        onChange={(value) => { setBarberId(value); setSelectedTimeSlot(""); setAvailableTimeSlots([]); setCarregandoHorarios(false);  }}
                         disabled={ campoDesabilitado || carregandoBarbeiros || barbeiros.length === 0 }
                     />
 
@@ -350,7 +367,12 @@ export default function Agendamento() {
                     <FormField
                         label="Data"
                         value={selectedDate}
-                        onChangeText={(value) => setSelectedDate(formatDateInput(value))}
+                        onChangeText={(value) => {
+                            setSelectedDate(formatDateInput(value));
+                            setSelectedTimeSlot("");
+                            setAvailableTimeSlots([]);
+                            setCarregandoHorarios(false);
+                        }}
                         editable={!campoDesabilitado}
                         placeholder="DD/MM/AAAA"
                         keyboardType="number-pad"
@@ -385,12 +407,27 @@ export default function Agendamento() {
 
                     <SelectField
                         label="Horários disponíveis (15 em 15 minutos)"
-                        placeholder="Selecione um horário"
+                        placeholder={ carregandoHorarios ? "Carregando horários..." : !barberId || !selectedDate ? "Selecione o barbeiro e a data" : timeOptions.length === 0 ? "Nenhum horário disponível" : "Selecione um horário" }
                         value={selectedTimeSlot}
                         options={timeOptions}
                         onChange={setSelectedTimeSlot}
-                        disabled={campoDesabilitado}
+                        disabled={ campoDesabilitado || carregandoHorarios || timeOptions.length === 0 }
                     />
+
+                    {!!erroHorarios && (
+                        <Text
+                            style={[
+                                styles.errorText,
+                                {
+                                    color: theme.danger,
+                                    fontFamily: font.baseMedium,
+                                    fontSize: fontSize.base,
+                                },
+                            ]}
+                        >
+                            {erroHorarios}
+                        </Text>
+                    )}
 
                     <FormField
                         label="Observações"
