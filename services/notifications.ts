@@ -46,22 +46,26 @@ export async function getLatestNotification(userId: number): Promise<Notificatio
         throw new Error("O ID do usuário deve ser um número inteiro positivo.");
     }
 
-    const response = await fetch(
-        `${requireMicroservicesUrl().replace(/\/$/, "")}/notifications/me`,
-        {
-            method: "GET",
-            headers: {
-                "x-user-id": String(userId),
+    try {
+        const response = await fetch(
+            `${requireMicroservicesUrl().replace(/\/$/, "")}/notifications/me`,
+            {
+                method: "GET",
+                headers: {
+                    "x-user-id": String(userId),
+                },
             },
-        },
-    );
+        );
 
-    const payload = await parseResponse<unknown>(
-        response,
-        "Não foi possível carregar suas notificações.",
-    );
+        const payload = await parseResponse<unknown>(
+            response,
+            "Não foi possível carregar suas notificações.",
+        );
 
-    return normalizeNotification(payload);
+        return normalizeNotification(payload);
+    } catch {
+        return null;
+    }
 }
 
 export async function getNotificationForAppointment(userId: number): Promise<Notification | null> {

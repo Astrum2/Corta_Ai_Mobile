@@ -82,7 +82,7 @@ export function requireApiUrl(): string {
 
 export function requireMicroservicesUrl(): string {
     if (!API_MICROSERVICES) {
-        throw new Error("EXPO_MICROSERVICES_PUBLIC_URL não está configurada.");
+        throw new Error("EXPO_PUBLIC_MICROSERVICES_URL não está configurada.");
     }
 
     return API_MICROSERVICES;

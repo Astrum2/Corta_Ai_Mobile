@@ -39,9 +39,10 @@ export default function Reviews() {
                     setCurrentUserName(loadedCurrentUserName);
                 }
             })
-            .catch((requestError: unknown) => {
+            .catch(() => {
                 if (isMounted) {
-                    setError( requestError instanceof Error ? requestError.message : "Não foi possível carregar as avaliações.");
+                    setReviews([]);
+                    setError("As reviews não estão disponíveis no momento");
                 }
             })
             .finally(() => {
