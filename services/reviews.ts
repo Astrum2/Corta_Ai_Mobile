@@ -14,6 +14,7 @@ export type Review = {
 
 export type CreateReviewData = {
     user_id: number;
+    user_name: string;
     rating: number;
     comment: string;
 };
@@ -26,6 +27,7 @@ export type UpdateReviewData = {
 export type ReviewsPageData = {
     reviews: Review[];
     currentUserId: number | null;
+    currentUserName: string | null;
 };
 
 export const REVIEWS_PER_PAGE = 10;
@@ -74,12 +76,17 @@ export async function loadReviews(): Promise<ReviewsPageData> {
     return {
         reviews,
         currentUserId: user?.id ?? null,
+        currentUserName: user?.name?.trim() || null,
     };
 }
 
 function validateReviewData(review: CreateReviewData): void {
     if (!Number.isInteger(review.user_id) || review.user_id <= 0) {
         throw new Error("O ID do usuário deve ser um número inteiro positivo.");
+    }
+
+    if (typeof review.user_name !== "string" || !review.user_name.trim()) {
+        throw new Error("O nome do usuário deve ser informado.");
     }
 
     if (!Number.isInteger(review.rating) || review.rating < 1 || review.rating > 5) {
@@ -91,13 +98,19 @@ function validateReviewData(review: CreateReviewData): void {
     }
 }
 
-export async function saveReview( reviewId: number | null, userId: number, review: UpdateReviewData ): Promise<Review> {
+export async function saveReview(
+    reviewId: number | null,
+    userId: number,
+    userName: string,
+    review: UpdateReviewData,
+): Promise<Review> {
     if (reviewId !== null) {
         return updateReview(reviewId, review);
     }
 
     return createReview({
         user_id: userId,
+        user_name: userName,
         ...review,
     });
 }
@@ -129,6 +142,7 @@ export async function createReview(review: CreateReviewData): Promise<Review> {
             },
             body: JSON.stringify({
                 user_id: review.user_id,
+                user_name: review.user_name.trim(),
                 rating: review.rating,
                 comment: review.comment.trim(),
             }),

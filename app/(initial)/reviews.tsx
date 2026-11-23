@@ -23,6 +23,7 @@ export default function Reviews() {
     const [submitting, setSubmitting] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+    const [currentUserName, setCurrentUserName] = useState<string | null>(null);
     const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
     const [deletingReviewId, setDeletingReviewId] = useState<number | null>(null);
     const [notification, setNotification] = useState<BackendNotification | null>(null);
@@ -31,10 +32,11 @@ export default function Reviews() {
         let isMounted = true;
 
         loadReviews()
-            .then(({ reviews: loadedReviews, currentUserId: loadedCurrentUserId }) => {
+            .then(({ reviews: loadedReviews, currentUserId: loadedCurrentUserId, currentUserName: loadedCurrentUserName }) => {
                 if (isMounted) {
                     setReviews(loadedReviews);
                     setCurrentUserId(loadedCurrentUserId);
+                    setCurrentUserName(loadedCurrentUserName);
                 }
             })
             .catch((requestError: unknown) => {
@@ -82,8 +84,9 @@ export default function Reviews() {
             setFormError(null);
 
             if (currentUserId === null) { throw new Error("Sua sessão expirou. Faça login novamente para avaliar."); }
+            if (currentUserName === null) { throw new Error("Não foi possível identificar o nome do usuário."); }
 
-            const savedReview = await saveReview(editingReviewId, currentUserId, { rating: selectedRating, comment });
+            const savedReview = await saveReview(editingReviewId, currentUserId, currentUserName, { rating: selectedRating, comment });
             setReviews((currentReviews) => editingReviewId === null ? [savedReview, ...currentReviews] : currentReviews.map((review) => (
                     review.id === savedReview.id ? savedReview : review
                 )));
